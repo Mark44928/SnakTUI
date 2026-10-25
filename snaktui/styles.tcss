@@ -1,0 +1,209 @@
+/* SnakTUI — neon arcade styling */
+
+Screen {
+    background: #05010f;
+    color: #e6f1ff;
+}
+
+/* ------------------------------------------------------------------ */
+/* Main menu                                                           */
+/* ------------------------------------------------------------------ */
+
+#menu-root {
+    width: 100%;
+    height: 100%;
+    align: center middle;
+    padding: 1;
+}
+
+#menu-box {
+    width: 96%;
+    max-width: 60;
+    height: auto;
+    border: round #2de2e6;
+    background: #070313;
+    padding: 1 2;
+}
+
+#menu-status {
+    height: 1;
+    text-align: center;
+    margin-bottom: 1;
+}
+
+#menu-logo {
+    height: 2;
+    text-align: center;
+}
+
+#menu-tagline {
+    height: 1;
+    text-align: center;
+    margin-top: 1;
+}
+
+#menu-rule {
+    height: 1;
+    text-align: center;
+    margin: 1 0;
+}
+
+#menu-list {
+    height: auto;
+    text-align: center;
+}
+
+#menu-footer {
+    height: 2;
+    text-align: center;
+    margin-top: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Game                                                                */
+/* ------------------------------------------------------------------ */
+
+#hud {
+    height: 2;
+    background: #080314;
+    padding: 0 1;
+}
+
+#game-body {
+    height: 1fr;
+    align: center middle;
+    padding: 0 1;
+}
+
+SnakeBoard {
+    border: round #2de2e6;
+    background: #05010f;
+}
+
+#sidebar {
+    width: 24;
+    height: 1fr;
+    max-height: 100%;
+    background: #080314;
+    border: round #ff2bd6;
+    padding: 0 1;
+    margin-left: 1;
+}
+
+#hint {
+    height: 1;
+    background: #080314;
+    color: #7183b0;
+    text-align: center;
+    padding: 0 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Modal screens                                                       */
+/* ------------------------------------------------------------------ */
+
+ModalScreen {
+    background: #05010f;
+}
+
+.modal-root {
+    width: 100%;
+    height: 100%;
+    align: center middle;
+    padding: 1;
+    background: #05010f;
+}
+
+.modal-box {
+    width: 96%;
+    max-width: 64;
+    height: auto;
+    border: round #2de2e6;
+    background: #070313;
+    padding: 1 2;
+}
+
+.modal-box.tall {
+    height: 100%;
+    max-width: 76;
+}
+
+#gameover-title,
+#scores-title,
+#help-title,
+#settings-title {
+    height: auto;
+    text-align: center;
+    text-style: bold;
+}
+
+#gameover-reason {
+    height: auto;
+    text-align: center;
+    margin-bottom: 1;
+}
+
+#gameover-stats {
+    height: auto;
+    margin-bottom: 1;
+}
+
+#gameover-actions {
+    height: auto;
+    margin-bottom: 1;
+}
+
+#gameover-hint,
+#scores-hint,
+#help-hint,
+#settings-hint {
+    height: 1;
+    text-align: center;
+    margin-top: 1;
+}
+
+#help-scroll {
+    height: 1fr;
+    margin-top: 1;
+}
+
+#scores-table,
+#help-body {
+    height: auto;
+}
+
+#scores-table {
+    margin-top: 1;
+}
+
+#settings-list {
+    height: auto;
+    margin: 1 0;
+}
+
+#settings-message {
+    height: 1;
+    text-align: center;
+}
+
+.gameover-box {
+    max-width: 56;
+}
+
+.settings-box {
+    max-width: 56;
+}
+
+.scores-box {
+    height: auto;
+    max-height: 92%;
+    max-width: 68;
+}
+
+ScrollableContainer {
+    scrollbar-size-vertical: 1;
+    scrollbar-color: #2de2e6;
+    scrollbar-color-hover: #ff2bd6;
+    scrollbar-color-active: #ffd166;
+    scrollbar-background: #120a24;
+}

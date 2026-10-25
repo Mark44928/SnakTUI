@@ -1,0 +1,68 @@
+[project]
+name = "snaktui"
+version = "1.0.0"
+description = "A feature-rich, visually stunning modern Snake game built with Python + Textual"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "textual>=1.0",
+]
+license = {text = "MIT"}
+authors = [
+    {name = "SnakTUI Contributors", email = "snaktui@example.com"}
+]
+keywords = ["game", "snake", "tui", "textual", "terminal"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Games/Entertainment :: Arcade",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "ruff>=0.5.0",
+    "mypy>=1.5.0",
+]
+
+[project.scripts]
+snaktui = "snaktui.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["snaktui*"]
+
+[tool.setuptools.package-data]
+snaktui = ["styles.tcss"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501", "SIM117"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["snaktui"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
