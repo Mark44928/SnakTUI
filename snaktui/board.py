@@ -11,7 +11,7 @@ from .game import Game
 from .models import FoodKind, Point
 from .theme import Palette, blend, darken
 
-EMPTY = (" ", "")
+EMPTY = (" ", "", None)
 SNAKE_CHAR = "█"
 HAZARD_CHAR = "▓"
 HALO_CHAR = "·"
@@ -46,24 +46,23 @@ class SnakeBoard(Widget):
         width, height = game.width, game.height
 
         flash = min(1.0, game.flash / 0.75)
-        grid: list[list[tuple[str, str]]] = []
-
+        row_bgs: list[str] = []
         for y in range(height):
-            row: list[tuple[str, str]] = []
-            for x in range(width):
-                background = (
-                    palette.bg_b if game.config.grid and (x + y) % 2 else palette.bg_a
-                )
-                if flash > 0:
-                    background = blend(background, palette.danger, flash * 0.28)
-                row.append((" ", f"on {background}"))
-            grid.append(row)
+            background = palette.bg_b if game.config.grid and y % 2 else palette.bg_a
+            if flash > 0:
+                background = blend(background, palette.danger, flash * 0.28)
+            row_bgs.append(background)
+
+        grid: list[list[tuple[str, str, str | None]]] = [
+            [EMPTY] * width for _ in range(height)
+        ]
 
         for obstacle in game.obstacles:
             if 0 <= obstacle.x < width and 0 <= obstacle.y < height:
                 grid[obstacle.y][obstacle.x] = (
                     HAZARD_CHAR,
-                    f"{palette.obstacle} on {darken(palette.obstacle, 0.65)}",
+                    palette.obstacle,
+                    darken(palette.obstacle, 0.65),
                 )
 
         snake = game.snake
@@ -74,16 +73,17 @@ class SnakeBoard(Widget):
                 continue
             color = palette.snake_gradient(index, length)
             if index == 0:
-                grid[point.y][point.x] = (SNAKE_CHAR, f"bold {color}")
+                grid[point.y][point.x] = (SNAKE_CHAR, f"bold {color}", None)
             else:
-                grid[point.y][point.x] = (SNAKE_CHAR, color)
+                grid[point.y][point.x] = (SNAKE_CHAR, color, None)
 
         if snake:
             head = snake[0]
+            halo = darken(palette.snake_head, 0.45)
             for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
                 x, y = head.x + dx, head.y + dy
                 if 0 <= x < width and 0 <= y < height and grid[y][x][0] == " ":
-                    grid[y][x] = (HALO_CHAR, darken(palette.snake_head, 0.45))
+                    grid[y][x] = (HALO_CHAR, halo, None)
 
         if game.food is not None:
             self._draw_food(grid, game.food.kind, game.food.pos, game.animation_time, 0.0)
@@ -102,7 +102,7 @@ class SnakeBoard(Widget):
                 continue
             ratio = max(0.0, particle.life / particle.max_life)
             color = blend(palette.bg_a, palette.role(particle.role), 0.35 + ratio * 0.65)
-            grid[y][x] = (particle.char, f"bold {color}")
+            grid[y][x] = (particle.char, f"bold {color}", None)
 
         for popup in game.popups:
             y = round(popup.y)
@@ -112,7 +112,7 @@ class SnakeBoard(Widget):
             for offset, char in enumerate(popup.text):
                 x = round(popup.x) + offset
                 if 0 <= x < width:
-                    grid[y][x] = (char, f"bold {color}")
+                    grid[y][x] = (char, f"bold {color}", None)
 
         if game.paused:
             self._draw_overlay(grid, width, height, "P A U S E D", "SPACE resume · Q quit")
@@ -126,10 +126,24 @@ class SnakeBoard(Widget):
             )
 
         result = Text()
-        for row_index, row in enumerate(grid):
-            for char, style in row:
-                result.append(char, style=style)
-            if row_index < height - 1:
+        for y, row in enumerate(grid):
+            row_bg = row_bgs[y]
+            run_chars: list[str] = []
+            run_fg: str | None = None
+            run_bg: str | None = None
+            for char, fg, bg in row:
+                cell_bg = bg if bg is not None else row_bg
+                if fg == run_fg and cell_bg == run_bg:
+                    run_chars.append(char)
+                    continue
+                if run_chars:
+                    result.append("".join(run_chars), style=_span_style(run_fg, run_bg))
+                run_chars = [char]
+                run_fg = fg
+                run_bg = cell_bg
+            if run_chars:
+                result.append("".join(run_chars), style=_span_style(run_fg, run_bg))
+            if y < height - 1:
                 result.append("\n")
         return result
 
@@ -138,7 +152,7 @@ class SnakeBoard(Widget):
     # ------------------------------------------------------------------
     def _draw_food(
         self,
-        grid: list[list[tuple[str, str]]],
+        grid: list[list[tuple[str, str, str | None]]],
         kind: FoodKind,
         point: Point,
         time: float,
@@ -157,11 +171,11 @@ class SnakeBoard(Widget):
             color = blend(color, palette.bg_a, 0.55)
 
         background = blend(palette.bg_a, palette.role(kind.value), 0.18 + pulse * 0.08)
-        grid[point.y][point.x] = (glyph, f"bold {color} on {background}")
+        grid[point.y][point.x] = (glyph, f"bold {color}", background)
 
     def _draw_overlay(
         self,
-        grid: list[list[tuple[str, str]]],
+        grid: list[list[tuple[str, str, str | None]]],
         width: int,
         height: int,
         title_text: str,
@@ -177,37 +191,40 @@ class SnakeBoard(Widget):
         for y in range(top, top + panel_height):
             for x in range(left, left + panel_width):
                 if 0 <= x < width and 0 <= y < height:
-                    grid[y][x] = (" ", f"on {background}")
+                    grid[y][x] = (" ", "", background)
 
-        border_style = f"bold {palette.golden} on {background}"
+        border_fg = f"bold {palette.golden}"
         top_edge = "╭" + "─" * (panel_width - 2) + "╮"
         bottom_edge = "╰" + "─" * (panel_width - 2) + "╯"
-        self._put_text(grid, left, top, top_edge, border_style)
-        self._put_text(grid, left, top + panel_height - 1, bottom_edge, border_style)
+        self._put_text(grid, left, top, top_edge, border_fg, background)
+        self._put_text(grid, left, top + panel_height - 1, bottom_edge, border_fg, background)
         for y in range(top + 1, top + panel_height - 1):
             if 0 <= left < width:
-                grid[y][left] = ("│", border_style)
+                grid[y][left] = ("│", border_fg, background)
             if 0 <= left + panel_width - 1 < width:
-                grid[y][left + panel_width - 1] = ("│", border_style)
+                grid[y][left + panel_width - 1] = ("│", border_fg, background)
 
         text_x = left + max(1, (panel_width - len(title_text)) // 2)
         hint_x = left + max(1, (panel_width - len(hint_text)) // 2)
-        self._put_text(
-            grid, text_x, top + 1, title_text, f"bold {palette.golden} on {background}"
-        )
-        self._put_text(
-            grid, hint_x, top + 3, hint_text, f"{palette.dim} on {background}"
-        )
+        self._put_text(grid, text_x, top + 1, title_text, border_fg, background)
+        self._put_text(grid, hint_x, top + 3, hint_text, palette.dim, background)
 
     @staticmethod
     def _put_text(
-        grid: list[list[tuple[str, str]]],
+        grid: list[list[tuple[str, str, str | None]]],
         x: int,
         y: int,
         text: str,
-        style: str,
+        fg: str,
+        bg: str,
     ) -> None:
         for offset, char in enumerate(text):
             column = x + offset
             if 0 <= column < len(grid[0]) and 0 <= y < len(grid):
-                grid[y][column] = (char, style)
+                grid[y][column] = (char, fg, bg)
+
+
+def _span_style(fg: str | None, bg: str | None) -> str:
+    if fg and bg:
+        return f"{fg} on {bg}"
+    return fg or (f"on {bg}" if bg else "")
