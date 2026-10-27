@@ -216,6 +216,11 @@ work over SSH and in CI without a TTY.
 - **Textual errors after an upgrade** — update it with
   `python -m pip install -U textual`.
 
+## Contributing
+
+PRs welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). All contributors follow
+the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## License
 
 MIT © 2026 SnakTUI Contributors. See [LICENSE](LICENSE).
