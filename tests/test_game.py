@@ -265,3 +265,39 @@ def test_stats_snapshot() -> None:
     assert stats.elapsed == 42.0
     assert stats.reason == "done"
     assert stats.new_high_score is True
+
+
+def test_frenzy_doubles_score_while_active() -> None:
+    game = make_game()
+    place_snake(game, Point(5, 5))
+    game.food = Food(FoodKind.APPLE, Point(2, 2))
+    game.special = Food(FoodKind.FRENZY, Point(6, 5), ttl=9.0)
+    game.update(0.2)
+    assert game.effect_remaining(FoodKind.FRENZY) == pytest.approx(6.0)
+    assert EventKind.POWER in game.drain_events()
+    assert game.score == 25  # frenzy itself is not doubled
+
+    # a normal apple eaten during frenzy is worth double (combo 2 -> x2)
+    game.snake = [Point(7, 5), Point(6, 5), Point(5, 5)]
+    game.direction = Direction.RIGHT
+    game.food = Food(FoodKind.APPLE, Point(8, 5))
+    game.update(0.2)
+    assert game.score == 25 + 40
+
+
+def test_frenzy_expires_and_stops_doubling() -> None:
+    game = make_game()
+    place_snake(game, Point(5, 5))
+    game.food = Food(FoodKind.APPLE, Point(2, 2))
+    game.special = Food(FoodKind.FRENZY, Point(6, 5), ttl=9.0)
+    game.update(0.2)
+    assert game.score == 25
+
+    # let frenzy lapse, then a plain apple scores without doubling
+    game.effects[FoodKind.FRENZY] = 0.01
+    game.snake = [Point(7, 5), Point(6, 5), Point(5, 5)]
+    game.direction = Direction.RIGHT
+    game.food = Food(FoodKind.APPLE, Point(8, 5))
+    game.update(0.2)
+    assert game.effect_remaining(FoodKind.FRENZY) == 0.0
+    assert game.score == 25 + 20

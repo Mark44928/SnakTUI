@@ -22,6 +22,7 @@ FOOD_GLYPHS: dict[FoodKind, str] = {
     FoodKind.SPEED: "▲",
     FoodKind.SLOW: "◈",
     FoodKind.GHOST: "○",
+    FoodKind.FRENZY: "✦",
 }
 
 

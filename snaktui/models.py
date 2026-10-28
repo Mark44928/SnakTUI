@@ -57,6 +57,7 @@ class FoodKind(Enum):
     SPEED = "speed"
     SLOW = "slow"
     GHOST = "ghost"
+    FRENZY = "frenzy"
 
     @property
     def score(self) -> int:
@@ -83,6 +84,7 @@ _FOOD_SCORE = {
     FoodKind.SPEED: 15,
     FoodKind.SLOW: 15,
     FoodKind.GHOST: 20,
+    FoodKind.FRENZY: 25,
 }
 
 _FOOD_TTL = {
@@ -91,6 +93,7 @@ _FOOD_TTL = {
     FoodKind.SPEED: 9.0,
     FoodKind.SLOW: 9.0,
     FoodKind.GHOST: 9.0,
+    FoodKind.FRENZY: 9.0,
 }
 
 _FOOD_EFFECT = {
@@ -99,6 +102,7 @@ _FOOD_EFFECT = {
     FoodKind.SPEED: 6.0,
     FoodKind.SLOW: 6.0,
     FoodKind.GHOST: 5.0,
+    FoodKind.FRENZY: 6.0,
 }
 
 

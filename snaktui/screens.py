@@ -38,11 +38,12 @@ LOGO = (
     " █▀▀ █▄ █ ▄▀█ █▄▀ ▀█▀ █ █ █",
     " ▄██ █ ▀█ █▀█ █ █  █  █▀█ █",
 )
-EFFECT_ORDER = (FoodKind.SPEED, FoodKind.SLOW, FoodKind.GHOST)
+EFFECT_ORDER = (FoodKind.SPEED, FoodKind.SLOW, FoodKind.GHOST, FoodKind.FRENZY)
 EFFECT_GLYPHS = {
     FoodKind.SPEED: "▲",
     FoodKind.SLOW: "◈",
     FoodKind.GHOST: "○",
+    FoodKind.FRENZY: "✦",
 }
 FOOD_GLYPHS_UI = {
     FoodKind.APPLE: "●",
@@ -50,6 +51,7 @@ FOOD_GLYPHS_UI = {
     FoodKind.SPEED: "▲",
     FoodKind.SLOW: "◈",
     FoodKind.GHOST: "○",
+    FoodKind.FRENZY: "✦",
 }
 FOOD_ROWS = (
     (FoodKind.APPLE, "Apple", "+10", "every run"),
@@ -57,6 +59,7 @@ FOOD_ROWS = (
     (FoodKind.SPEED, "Speed", "+15", "boost 6s"),
     (FoodKind.SLOW, "Slow", "+15", "slow-mo 6s"),
     (FoodKind.GHOST, "Ghost", "+20", "phase 5s"),
+    (FoodKind.FRENZY, "Frenzy", "+25", "2x pts 6s"),
 )
 
 
@@ -552,6 +555,7 @@ class GameScreen(Screen):
             FoodKind.SPEED,
             FoodKind.SLOW,
             FoodKind.GHOST,
+            FoodKind.FRENZY,
         ):
             text.append(FOOD_GLYPHS_UI[kind], style=f"bold {palette.role(kind.value)}")
         text.append("▓", style=f"bold {palette.obstacle}")
@@ -560,6 +564,8 @@ class GameScreen(Screen):
             tip = "chain apples"
             if game.effect_remaining(FoodKind.GHOST) > 0:
                 tip = "phase walls"
+            elif game.effect_remaining(FoodKind.FRENZY) > 0:
+                tip = "double points"
             elif game.effect_remaining(FoodKind.SPEED) > 0:
                 tip = "fast tempo"
             elif game.effect_remaining(FoodKind.SLOW) > 0:

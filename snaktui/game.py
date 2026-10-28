@@ -300,6 +300,8 @@ class Game:
         self.max_combo = max(self.max_combo, self.multiplier)
 
         gained = kind.score * self.multiplier
+        if FoodKind.FRENZY in self.effects:
+            gained *= 2
         self.score += gained
         self.food_eaten += 1
 
@@ -387,6 +389,7 @@ class Game:
             FoodKind.SLOW,
             FoodKind.GHOST,
             FoodKind.GHOST,
+            FoodKind.FRENZY,
         ]
         kind = self.rng.choice(kinds)
         cells = [

@@ -52,6 +52,7 @@ class Palette:
     speed: str
     slow: str
     ghost: str
+    frenzy: str
     obstacle: str
     accent: str
     accent2: str
@@ -68,6 +69,7 @@ class Palette:
             "speed": self.speed,
             "slow": self.slow,
             "ghost": self.ghost,
+            "frenzy": self.frenzy,
             "danger": self.danger,
             "accent": self.accent,
             "snake": self.snake_body,
@@ -97,6 +99,7 @@ NEON = Palette(
     golden="#ffd166",
     speed="#2de2e6",
     slow="#60a5fa",
+    frenzy="#ff8a3d",
     ghost="#c084fc",
     obstacle="#475569",
     accent="#ff2bd6",
@@ -120,6 +123,7 @@ AMBER = Palette(
     golden="#ffe08a",
     speed="#ffc857",
     slow="#9ecbff",
+    frenzy="#ff7a45",
     ghost="#e0aaff",
     obstacle="#5b4636",
     accent="#ff9f1c",
@@ -143,6 +147,7 @@ MATRIX = Palette(
     golden="#facc15",
     speed="#4ade80",
     slow="#38bdf8",
+    frenzy="#f97316",
     ghost="#a78bfa",
     obstacle="#14532d",
     accent="#86efac",
@@ -166,6 +171,7 @@ ICE = Palette(
     golden="#fde047",
     speed="#67e8f9",
     slow="#a5b4fc",
+    frenzy="#f472b6",
     ghost="#d8b4fe",
     obstacle="#334155",
     accent="#a5f3fc",
@@ -189,6 +195,7 @@ CANDY = Palette(
     golden="#fde047",
     speed="#67e8f9",
     slow="#93c5fd",
+    frenzy="#ff9de2",
     ghost="#c084fc",
     obstacle="#6b2145",
     accent="#f9a8d4",

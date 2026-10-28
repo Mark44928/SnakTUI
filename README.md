@@ -36,8 +36,8 @@ no browser, no GPU.
 - **Fast, modern arena** — gradient snake, glowing food, particle bursts,
   floating score popups and screen shake on death.
 - **Combo scoring** — eat quickly to stack a multiplier up to **x5**.
-- **Power-ups** — Speed, Slow and Ghost (phase through walls, hazards and
-  yourself).
+- **Power-ups** — Speed, Slow, Ghost (phase through walls, hazards and
+  yourself) and Frenzy (double points).
 - **Special food** — rare golden apples, timed spawns that blink before they
   expire.
 - **Progressive difficulty** — level up every 4 apples; speed climbs and
@@ -146,6 +146,7 @@ rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/snaktui"
 | Speed | `▲` | +15 | Faster for 6s |
 | Slow | `◈` | +15 | Slow-mo for 6s |
 | Ghost | `○` | +20 | Phase through walls, hazards and yourself for 5s |
+| Frenzy | `✦` | +25 | Double points for 6s |
 | Hazard | `▓` | — | Deadly obstacle |
 
 Every apple eaten within the combo window raises the multiplier, capped at
