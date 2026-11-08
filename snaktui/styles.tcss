@@ -1,8 +1,23 @@
 /* SnakTUI — neon arcade styling */
 
+/* Fallbacks matching the Neon palette. The active theme (registered per
+   palette in app.py build_theme) overrides these at runtime, so the chrome
+   follows whichever theme the player picked. */
+$snake-bg-a: #05010f;
+$snake-bg-b: #0a0320;
+$snake-frame: #2de2e6;
+$snake-frame-dim: #155e6b;
+$snake-accent: #ff2bd6;
+$snake-accent2: #2de2e6;
+$snake-text: #e6f1ff;
+$snake-dim: #7183b0;
+$snake-danger: #ff3b30;
+$snake-golden: #ffd166;
+$snake-panel: #070313;
+
 Screen {
-    background: #05010f;
-    color: #e6f1ff;
+    background: $snake-bg-a;
+    color: $snake-text;
 }
 
 /* ------------------------------------------------------------------ */
@@ -20,8 +35,8 @@ Screen {
     width: 96%;
     max-width: 60;
     height: auto;
-    border: round #2de2e6;
-    background: #070313;
+    border: round $snake-frame;
+    background: $snake-panel;
     padding: 1 2;
 }
 
@@ -65,7 +80,7 @@ Screen {
 
 #hud {
     height: 2;
-    background: #080314;
+    background: $snake-panel;
     padding: 0 1;
 }
 
@@ -76,24 +91,24 @@ Screen {
 }
 
 SnakeBoard {
-    border: round #2de2e6;
-    background: #05010f;
+    border: round $snake-frame;
+    background: $snake-bg-a;
 }
 
 #sidebar {
     width: 24;
     height: 1fr;
     max-height: 100%;
-    background: #080314;
-    border: round #ff2bd6;
+    background: $snake-panel;
+    border: round $snake-accent;
     padding: 0 1;
     margin-left: 1;
 }
 
 #hint {
     height: 1;
-    background: #080314;
-    color: #7183b0;
+    background: $snake-panel;
+    color: $snake-dim;
     text-align: center;
     padding: 0 1;
 }
@@ -103,7 +118,7 @@ SnakeBoard {
 /* ------------------------------------------------------------------ */
 
 ModalScreen {
-    background: #05010f;
+    background: $snake-bg-a;
 }
 
 .modal-root {
@@ -111,15 +126,15 @@ ModalScreen {
     height: 100%;
     align: center middle;
     padding: 1;
-    background: #05010f;
+    background: $snake-bg-a;
 }
 
 .modal-box {
     width: 96%;
     max-width: 64;
     height: auto;
-    border: round #2de2e6;
-    background: #070313;
+    border: round $snake-frame;
+    background: $snake-panel;
     padding: 1 2;
 }
 
@@ -202,8 +217,8 @@ ModalScreen {
 
 ScrollableContainer {
     scrollbar-size-vertical: 1;
-    scrollbar-color: #2de2e6;
-    scrollbar-color-hover: #ff2bd6;
-    scrollbar-color-active: #ffd166;
-    scrollbar-background: #120a24;
+    scrollbar-color: $snake-frame;
+    scrollbar-color-hover: $snake-accent;
+    scrollbar-color-active: $snake-golden;
+    scrollbar-background: $snake-panel;
 }

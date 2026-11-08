@@ -1,6 +1,6 @@
 [project]
 name = "snaktui"
-version = "1.0.0"
+version = "1.1.0"
 description = "A feature-rich, visually stunning modern Snake game built with Python + Textual"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -58,6 +58,7 @@ known-first-party = ["snaktui"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 pythonpath = ["."]
 

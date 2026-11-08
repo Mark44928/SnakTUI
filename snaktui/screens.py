@@ -15,7 +15,7 @@ from textual.containers import Container, Horizontal, ScrollableContainer, Verti
 from textual.screen import ModalScreen, Screen
 from textual.widgets import Static
 
-from .board import SnakeBoard
+from .board import FOOD_GLYPHS, SnakeBoard
 from .game import LEVEL_EVERY, Game
 from .models import (
     DIFFICULTIES,
@@ -38,20 +38,13 @@ LOGO = (
     " █▀▀ █▄ █ ▄▀█ █▄▀ ▀█▀ █ █ █",
     " ▄██ █ ▀█ █▀█ █ █  █  █▀█ █",
 )
-EFFECT_ORDER = (FoodKind.SPEED, FoodKind.SLOW, FoodKind.GHOST, FoodKind.FRENZY)
+EFFECT_ORDER = (FoodKind.SPEED, FoodKind.SLOW, FoodKind.GHOST, FoodKind.FRENZY, FoodKind.MAGNET)
 EFFECT_GLYPHS = {
     FoodKind.SPEED: "▲",
     FoodKind.SLOW: "◈",
     FoodKind.GHOST: "○",
     FoodKind.FRENZY: "✦",
-}
-FOOD_GLYPHS_UI = {
-    FoodKind.APPLE: "●",
-    FoodKind.GOLDEN: "◆",
-    FoodKind.SPEED: "▲",
-    FoodKind.SLOW: "◈",
-    FoodKind.GHOST: "○",
-    FoodKind.FRENZY: "✦",
+    FoodKind.MAGNET: "✚",
 }
 FOOD_ROWS = (
     (FoodKind.APPLE, "Apple", "+10", "every run"),
@@ -60,6 +53,7 @@ FOOD_ROWS = (
     (FoodKind.SLOW, "Slow", "+15", "slow-mo 6s"),
     (FoodKind.GHOST, "Ghost", "+20", "phase 5s"),
     (FoodKind.FRENZY, "Frenzy", "+25", "2x pts 6s"),
+    (FoodKind.MAGNET, "Magnet", "+20", "pulls apples 8s"),
 )
 
 
@@ -353,6 +347,21 @@ class GameScreen(Screen):
         if self.app.size.width < 34 or self.app.size.height < 14:
             self.app.notify("Terminal is small — resize for the full arena", timeout=3)
 
+    def on_resize(self, event: events.Resize) -> None:
+        # Re-derive sidebar presence on resize; compose() runs once, so the
+        # sidebar was previously stuck at whatever width the game started at.
+        show_sidebar = event.size.width >= 76
+        sidebar = self.query_optional_one("#sidebar")
+        body = self.query_one("#game-body", Horizontal)
+        if show_sidebar and sidebar is None:
+            mounted = Static(id="sidebar")
+            mounted.styles.height = self.game.height + 2
+            body.mount(mounted)
+            self._update_hud(force=True)
+        elif not show_sidebar and sidebar is not None:
+            sidebar.remove()
+            self._update_hud(force=True)
+
     def on_unmount(self) -> None:
         if self._timer is not None:
             self._timer.stop()
@@ -435,6 +444,11 @@ class GameScreen(Screen):
             line_two.append(f"COMBO x{game.multiplier} ", style=f"bold {palette.accent}")
             line_two.append_text(self._combo_bar(palette, width=10))
             line_two.append("  ", style="")
+        # Level progress: a small bar toward the next level (v1.1.0)
+        if width >= 80:
+            line_two.append("NEXT ", style=palette.dim)
+            line_two.append_text(self._level_bar(palette, width=8))
+            line_two.append("  ", style="")
         for kind in EFFECT_ORDER:
             remaining = game.effect_remaining(kind)
             if remaining > 0:
@@ -498,6 +512,17 @@ class GameScreen(Screen):
         bar.append("░" * (width - filled), style=palette.frame_dim)
         return bar
 
+    def _level_bar(self, palette: Palette, width: int) -> Text:
+        """Progress toward the next level (apples eaten this level)."""
+
+        eaten = self.game.apples_eaten % LEVEL_EVERY
+        ratio = max(0.0, min(1.0, eaten / LEVEL_EVERY))
+        filled = round(ratio * width)
+        bar = Text()
+        bar.append("█" * filled, style=f"bold {palette.golden}")
+        bar.append("░" * (width - filled), style=palette.frame_dim)
+        return bar
+
     def _sidebar_text(self, palette: Palette) -> Text:
         game = self.game
         best = max(self.store.high_score, game.score)
@@ -540,8 +565,8 @@ class GameScreen(Screen):
         text.append("\n")
         text.append("MODE  ", style=f"bold {palette.accent}")
         mode = "wrap" if self.config.wrap else "walls"
-        mode += "·haz" if self.config.obstacles else "·safe"
-        mode += "·grid" if self.config.grid else ""
+        mode += " · haz" if self.config.obstacles else " · safe"
+        mode += " · grid" if self.config.grid else ""
         text.append(mode + "\n", style=palette.text)
         text.append("SOUND ", style=f"bold {palette.accent}")
         text.append(
@@ -557,7 +582,7 @@ class GameScreen(Screen):
             FoodKind.GHOST,
             FoodKind.FRENZY,
         ):
-            text.append(FOOD_GLYPHS_UI[kind], style=f"bold {palette.role(kind.value)}")
+            text.append(FOOD_GLYPHS[kind], style=f"bold {palette.role(kind.value)}")
         text.append("▓", style=f"bold {palette.obstacle}")
 
         if game.height >= 20:
@@ -628,7 +653,6 @@ class GameOverScreen(Screen):
         self.index = 0
 
     def compose(self) -> ComposeResult:
-        palette = app_of(self).palette
         with Container(classes="modal-root"):
             with Vertical(classes="modal-box gameover-box"):
                 yield Static(id="gameover-title")
@@ -636,7 +660,6 @@ class GameOverScreen(Screen):
                 yield Static(id="gameover-stats")
                 yield Static(id="gameover-actions")
                 yield Static(id="gameover-hint")
-        self._palette = palette
 
     def on_mount(self) -> None:
         self._refresh()
@@ -844,8 +867,6 @@ class SettingsScreen(ModalScreen):
         label = self._options()[self.index][0]
         if label == "Back":
             self.dismiss()
-        elif label in ("Reset high scores", "Wrap walls", "Hazards", "Grid", "Sound"):
-            self._change(1)
         else:
             self._change(1)
 
@@ -956,7 +977,7 @@ class HelpScreen(ModalScreen):
 
         body.append("\nFOOD & POWER-UPS\n", style=f"bold {palette.accent}")
         for kind, name, score, note in FOOD_ROWS:
-            body.append(f"  {FOOD_GLYPHS_UI[kind]} ", style=f"bold {palette.role(kind.value)}")
+            body.append(f"  {FOOD_GLYPHS[kind]} ", style=f"bold {palette.role(kind.value)}")
             body.append(f"{name:<10}", style=f"bold {palette.text}")
             body.append(f"{score:>4}  ", style=palette.accent2)
             body.append(f"{note}\n", style=palette.dim)

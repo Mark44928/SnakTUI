@@ -18,7 +18,7 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
 | `snaktui/screens.py` | All screens, HUD, sidebar, modals, key handling, and rendering. |
 | `snaktui/app.py` | App shell, adaptive board sizing, screen navigation, score saving. |
 | `snaktui/styles.tcss` | Layout and color CSS. |
-| `tests/` | Pytest suite, including headless Textual smoke tests. |
+| `tests/` | Pytest suite (61 tests, headless — no TTY needed), including headless Textual smoke tests. |
 
 ## Invariants
 
@@ -29,6 +29,12 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
 - Persistence atomic (`tmp.replace`), never raises on I/O errors.
 - Settings sanitized through `Settings.sanitized()`.
 - UI usable at **80×24**; sidebar hidden below 76 cols, hint shortens below 90 cols.
+- v1.1.0: `FoodKind.MAGNET` drags the apple one cell toward the head every
+  other step (`Game._pull_food`) — a pull, never a teleport, and it may never
+  place food on the snake, a hazard or the special. `EFFECT_ORDER`,
+  `EFFECT_GLYPHS`, `board.FOOD_GLYPHS` and the help-screen `FOOD_ROWS` all
+  cover the new kind; the HUD's `NEXT` level bar (`GameScreen._level_bar`) only
+  renders at width ≥ 80.
 
 ## Commands (Termux)
 

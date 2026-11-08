@@ -37,7 +37,7 @@ no browser, no GPU.
   floating score popups and screen shake on death.
 - **Combo scoring** — eat quickly to stack a multiplier up to **x5**.
 - **Power-ups** — Speed, Slow, Ghost (phase through walls, hazards and
-  yourself) and Frenzy (double points).
+  yourself), Frenzy (double points) and Magnet (pulls apples toward you).
 - **Special food** — rare golden apples, timed spawns that blink before they
   expire.
 - **Progressive difficulty** — level up every 4 apples; speed climbs and
@@ -147,10 +147,14 @@ rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/snaktui"
 | Slow | `◈` | +15 | Slow-mo for 6s |
 | Ghost | `○` | +20 | Phase through walls, hazards and yourself for 5s |
 | Frenzy | `✦` | +25 | Double points for 6s |
+| Magnet | `✚` | +20 | Drags apples toward the snake for 8s |
 | Hazard | `▓` | — | Deadly obstacle |
 
 Every apple eaten within the combo window raises the multiplier, capped at
 **x5**. Level up every **4** apples. The multiplier applies to all food.
+
+The HUD tracks live effect timers, and on wider terminals a **NEXT** bar shows
+progress toward the next level.
 
 ## Settings & data
 

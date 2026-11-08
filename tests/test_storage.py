@@ -134,3 +134,10 @@ def test_make_entry_formats_date() -> None:
     entry = make_entry(10, 1, 4, "Classic", "neon")
     assert isinstance(entry, ScoreEntry)
     assert re.fullmatch(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}", entry.date)
+
+
+def test_zero_score_ignored_at_storage_layer(tmp_path: Path) -> None:
+    # The invariant lives in storage too, not only in the app guard.
+    store = Store(tmp_path / "state.json")
+    assert store.add_score(make_entry(0, 1, 3, "Classic", "neon")) is False
+    assert store.scores == []

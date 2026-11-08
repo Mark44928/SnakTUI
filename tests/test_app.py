@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from textual.geometry import Size
-
 from snaktui.app import SnakTUI
 from snaktui.game import Game
 from snaktui.models import GameConfig
@@ -18,8 +16,11 @@ from snaktui.screens import (
 from snaktui.storage import Store
 
 
-def make_app(tmp_path: Path) -> SnakTUI:
-    return SnakTUI(store=Store(tmp_path / "state.json"))
+def make_app(tmp_path: Path, **settings: object) -> SnakTUI:
+    store = Store(tmp_path / "state.json")
+    if settings:
+        store.update_settings(**settings)
+    return SnakTUI(store=store)
 
 
 async def test_starts_on_menu(tmp_path: Path) -> None:
@@ -30,7 +31,9 @@ async def test_starts_on_menu(tmp_path: Path) -> None:
 
 
 async def test_enter_starts_game_and_pause_toggles(tmp_path: Path) -> None:
-    app = make_app(tmp_path)
+    # Wrap walls off: pilot.pause() can consume seconds of wall time, and a plain
+    # rightward snake would legitimately reach the wall before the second press.
+    app = make_app(tmp_path, wrap=True)
     async with app.run_test(size=(100, 30)) as pilot:
         await pilot.pause(0.3)
         await pilot.press("enter")
@@ -116,17 +119,46 @@ async def test_narrow_terminal_hides_sidebar(tmp_path: Path) -> None:
         assert len(app.screen.query("#sidebar")) == 0
 
 
-def test_build_config_adapts_to_size(tmp_path: Path) -> None:
-    app = make_app(tmp_path)
-    app._size = Size(100, 30)  # type: ignore[attr-defined]
-    config = app.build_config()
-    assert config.width == 44
-    assert config.height == 22
+async def test_theme_change_retints_css_chrome(tmp_path: Path) -> None:
+    # Switching the game palette must also switch the registered Textual
+    # theme, otherwise styles.tcss chrome stays Neon forever.
+    app = make_app(tmp_path, theme="candy")
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        assert app.theme == "candy"
+        app.apply_settings(theme="matrix")
+        assert app.theme == "matrix"
+        assert app.settings.theme == "matrix"
 
-    app._size = Size(80, 24)  # type: ignore[attr-defined]
-    config = app.build_config()
-    assert config.width == 44
-    assert config.height == 19
+
+async def test_resize_restores_sidebar(tmp_path: Path) -> None:
+    # The sidebar is decided in compose(); growing the terminal mid-run must
+    # mount it back instead of leaving the arena cramped.
+    app = make_app(tmp_path)
+    async with app.run_test(size=(70, 24)) as pilot:
+        await pilot.pause(0.3)
+        await pilot.press("enter")
+        await pilot.pause(0.3)
+        assert len(app.screen.query("#sidebar")) == 0
+        await pilot.resize_terminal(100, 30)
+        await pilot.pause(0.3)
+        assert len(app.screen.query("#sidebar")) == 1
+        await pilot.resize_terminal(70, 24)
+        await pilot.pause(0.3)
+        assert len(app.screen.query("#sidebar")) == 0
+
+
+async def test_build_config_adapts_to_size(tmp_path: Path) -> None:
+    app = make_app(tmp_path)
+    async with app.run_test(size=(100, 30)):
+        config = app.build_config()
+        assert config.width == 44
+        assert config.height == 22
+    app2 = make_app(tmp_path)
+    async with app2.run_test(size=(80, 24)):
+        config = app2.build_config()
+        assert config.width == 44
+        assert config.height == 19
 
 
 def test_complete_run_skips_zero_score(tmp_path: Path) -> None:

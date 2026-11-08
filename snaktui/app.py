@@ -4,12 +4,48 @@ from __future__ import annotations
 
 from textual.app import App
 from textual.binding import Binding
+from textual.theme import Theme
 
 from .game import Game
 from .models import DIFFICULTIES, GameConfig, RunStats
 from .screens import GameScreen, MenuScreen
 from .storage import Store, make_entry
-from .theme import Palette, get_palette
+from .theme import THEMES, Palette, blend, get_palette
+
+
+def build_theme(palette: Palette) -> Theme:
+    """Expose a game palette as a Textual theme.
+
+    Registering each palette lets ``styles.tcss`` chrome (screen background,
+    borders, panels) follow the selected theme through CSS variables instead of
+    staying frozen on the Neon colors.
+    """
+
+    panel = blend(palette.bg_a, palette.frame, 0.12)
+    return Theme(
+        name=palette.key,
+        primary=palette.frame,
+        secondary=palette.accent2,
+        accent=palette.accent,
+        foreground=palette.text,
+        background=palette.bg_a,
+        surface=palette.bg_b,
+        panel=panel,
+        dark=True,
+        variables={
+            "snake-bg-a": palette.bg_a,
+            "snake-bg-b": palette.bg_b,
+            "snake-frame": palette.frame,
+            "snake-frame-dim": palette.frame_dim,
+            "snake-accent": palette.accent,
+            "snake-accent2": palette.accent2,
+            "snake-text": palette.text,
+            "snake-dim": palette.dim,
+            "snake-danger": palette.danger,
+            "snake-golden": palette.golden,
+            "snake-panel": panel,
+        },
+    )
 
 
 class SnakTUI(App):
@@ -33,6 +69,9 @@ class SnakTUI(App):
         return get_palette(self.settings.theme)
 
     def on_mount(self) -> None:
+        for palette in THEMES.values():
+            self.register_theme(build_theme(palette))
+        self.theme = self.palette.key
         self.push_screen(MenuScreen())
 
     # ------------------------------------------------------------------
@@ -70,6 +109,9 @@ class SnakTUI(App):
     def apply_settings(self, **changes: object) -> None:
         self.store.update_settings(**changes)
         self.settings = self.store.settings
+        theme_key = changes.get("theme")
+        if isinstance(theme_key, str) and theme_key in THEMES:
+            self.theme = theme_key  # re-skins CSS chrome, not just Rich text
 
     def complete_run(self, game: Game) -> RunStats:
         entry = make_entry(

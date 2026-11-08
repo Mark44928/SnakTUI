@@ -301,3 +301,65 @@ def test_frenzy_expires_and_stops_doubling() -> None:
     game.update(0.2)
     assert game.effect_remaining(FoodKind.FRENZY) == 0.0
     assert game.score == 25 + 20
+
+
+def test_obstacles_spawn_on_difficulty_cadence() -> None:
+    # classic spawns one hazard every 3 levels (difficulty.obstacle_every),
+    # not one per level-up like the previous hardcoded rule.
+    game = make_game(obstacles=True, difficulty=DIFFICULTIES["classic"])
+    place_snake(game, Point(5, 5))
+
+    game.apples_eaten = 3  # next apple levels up to 2
+    game.food = Food(FoodKind.APPLE, Point(6, 5))
+    game.update(0.2)
+    assert game.level == 2
+    assert game.obstacles == set()
+
+    game.apples_eaten = 7  # next apple levels up to 3
+    game.snake = [Point(5, 5), Point(4, 5), Point(3, 5)]
+    game.direction = Direction.RIGHT
+    game.food = Food(FoodKind.APPLE, Point(6, 5))
+    game.update(0.2)
+    assert game.level == 3
+    assert len(game.obstacles) == 1
+
+
+def test_magnet_pulls_apple_toward_head() -> None:
+    # v1.1.0: while MAGNET is active the apple is dragged one cell closer
+    # every other step -- a pull, not a teleport.
+    game = make_game()
+    place_snake(game, Point(5, 5))
+    game.food = Food(FoodKind.APPLE, Point(14, 5))
+    game.effects[FoodKind.MAGNET] = 8.0
+
+    game.update(0.2)
+
+    assert game.food is not None
+    assert game.food.pos.x < 14, "apple was not pulled toward the head"
+    assert game.food.pos.y == 5, "pull must stay on the row for a straight shot"
+
+
+def test_magnet_never_crawls_into_the_snake() -> None:
+    game = make_game()
+    game.snake = [Point(5, 5), Point(6, 5), Point(7, 5)]
+    game.direction = Direction.RIGHT
+    game.ready_timer = 0
+    game.food = Food(FoodKind.APPLE, Point(8, 5))
+    game.effects[FoodKind.MAGNET] = 8.0
+    for _ in range(4):
+        game.update(0.2)
+    assert game.food is not None
+    assert game.food.pos not in set(game.snake)
+
+
+def test_magnet_expires_and_stops_pulling() -> None:
+    game = make_game()
+    place_snake(game, Point(5, 5))
+    game.food = Food(FoodKind.APPLE, Point(17, 5))  # far: never eaten during the test
+    game.effects[FoodKind.MAGNET] = 0.05
+    game.update(0.2)
+    assert FoodKind.MAGNET not in game.effects
+    resting = game.food.pos
+    for _ in range(3):
+        game.update(0.2)
+    assert game.food.pos == resting

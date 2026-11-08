@@ -133,8 +133,15 @@ class Store:
         return self.scores[0].score if self.scores else 0
 
     def add_score(self, entry: ScoreEntry) -> bool:
-        """Insert a score, returning True when it is a new personal best."""
+        """Insert a score, returning True when it is a new personal best.
 
+        Zero scores are ignored here too (not just in the app layer): the
+        invariant "zero-score runs not persisted" must hold for every caller,
+        otherwise one careless call site silently writes junk to the board.
+        """
+
+        if entry.score <= 0:
+            return False
         new_best = entry.score > self.high_score
         self.scores.append(entry)
         self.scores.sort(key=lambda item: item.score, reverse=True)

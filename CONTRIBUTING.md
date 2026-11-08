@@ -10,9 +10,11 @@ Thanks for wanting to improve SnakTUI! A few ground rules before you code.
 2. **Everything renders in Unicode blocks.** No emoji sprites, no ASCII art
    files, no images. If a visual can't be drawn with `█▓▒░ ●` characters and
    rich styles, it doesn't belong.
-3. **Match the existing architecture** — `app.py` (screens/input), `snake.py`
-   (game model), `render.py` (drawing), `settings.py` (persistence). Don't
-   create new top-level modules for small features.
+3. **Match the existing architecture** — `app.py` (app shell, theme
+   registration, screen navigation), `screens.py` (screens, HUD, sidebar,
+   input), `board.py` (arena rendering), `game.py` (pure simulation),
+   `models.py` (dataclasses/enums), `theme.py` (palettes), `storage.py`
+   (persistence). The four pure modules must stay importable without Textual.
 4. **Style**: `ruff check .` must pass with the repo's config. Keep the
    existing naming and comment discipline (no comment noise).
 
@@ -39,8 +41,10 @@ Thanks for wanting to improve SnakTUI! A few ground rules before you code.
 ## Good first issues
 
 - New food types (see `Food & scoring` table in the README).
-- New themes (see `settings.py` theme data — must remain readable under all
-  five existing themes too).
+- New themes (add a `Palette` in `snaktui/theme.py` **and** the matching
+  `Theme(...)` variables in `app.py` `build_theme` — the CSS chrome reads the
+  registered theme's variables, so a palette without the registration only
+  colors the Rich text and the chrome stays Neon).
 - Leaderboard export formats.
 
 ## Reporting issues

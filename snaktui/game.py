@@ -52,6 +52,7 @@ class Game:
         self.obstacles: set[Point] = set()
         self.food: Food | None = None
         self.special: Food | None = None
+        self._magnet_pull = False
 
         self.score = 0
         self.apples_eaten = 0
@@ -248,6 +249,13 @@ class Game:
             self.direction = self._pending.popleft()
 
         ghost = FoodKind.GHOST in self.effects
+        magnet = FoodKind.MAGNET in self.effects
+        # Magnet drags the apple one cell closer every other step — a gentle
+        # pull, not a teleport, so the snake still has to aim.
+        self._magnet_pull = not self._magnet_pull
+        if magnet and self._magnet_pull and self.food is not None:
+            self._pull_food()
+
         new_head = self.head.moved(self.direction)
         wrapped = not (0 <= new_head.x < self.width and 0 <= new_head.y < self.height)
 
@@ -323,8 +331,8 @@ class Game:
             self.events.append(EventKind.LEVEL)
             self._popup(Point(head.x, max(0, head.y - 1)), f"LEVEL {self.level}", "accent", 1.2)
             self._burst(head, "accent", count=16, spread=5.0)
-            if self.config.obstacles:
-                self._spawn_obstacles(1 + self.level // 2)
+            if self.config.obstacles and self.level % self.difficulty.obstacle_every == 0:
+                self._spawn_obstacles(1)
 
         if self.food is None:
             self.food = self._spawn_food(FoodKind.APPLE)
@@ -390,6 +398,7 @@ class Game:
             FoodKind.GHOST,
             FoodKind.GHOST,
             FoodKind.FRENZY,
+            FoodKind.MAGNET,
         ]
         kind = self.rng.choice(kinds)
         cells = [
@@ -404,6 +413,34 @@ class Game:
             pos=self.rng.choice(cells),
             ttl=kind.duration,
         )
+
+    def _pull_food(self) -> None:
+        """Drag the apple one cell toward the head (magnet power-up)."""
+
+        if self.food is None:
+            return
+        head, target = self.head, self.food.pos
+        if target == head:
+            return
+        dx = (target.x > head.x) - (target.x < head.x)
+        dy = (target.y > head.y) - (target.y < head.y)
+        # Prefer the axis with the larger gap so diagonals close in straight-ish
+        # lines; try the second axis if the first is blocked.
+        candidates = (
+            [Point(target.x - dx, target.y), Point(target.x, target.y - dy)]
+            if abs(target.x - head.x) >= abs(target.y - head.y)
+            else [Point(target.x, target.y - dy), Point(target.x - dx, target.y)]
+        )
+        occupied = set(self.snake) | self.obstacles
+        for cell in candidates:
+            if (
+                0 <= cell.x < self.width
+                and 0 <= cell.y < self.height
+                and cell not in occupied
+                and (self.special is None or cell != self.special.pos)
+            ):
+                self.food = Food(self.food.kind, cell, ttl=self.food.ttl)
+                return
 
     def _spawn_obstacles(self, count: int) -> None:
         area = self.width * self.height
