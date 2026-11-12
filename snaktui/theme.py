@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 
 def _rgb(color: str) -> tuple[int, int, int]:
@@ -14,8 +15,13 @@ def _rgb(color: str) -> tuple[int, int, int]:
     return int(value[0:2], 16), int(value[2:4], 16), int(value[4:6], 16)
 
 
+@lru_cache(maxsize=4096)
 def blend(first: str, second: str, amount: float) -> str:
-    """Mix two hex colors. ``amount=0`` is first, ``amount=1`` is second."""
+    """Mix two hex colors. ``amount=0`` is first, ``amount=1`` is second.
+
+    Pure function of its arguments, and the renderer calls it dozens of
+    times per frame with repeating colors, so results are memoized.
+    """
 
     amount = max(0.0, min(1.0, amount))
     r1, g1, b1 = _rgb(first)
@@ -61,20 +67,14 @@ class Palette:
     danger: str
 
     def role(self, role: str) -> str:
-        """Resolve a semantic color role used by particles and popups."""
+        """Resolve a semantic color role used by particles and popups.
 
-        return {
-            "apple": self.apple,
-            "golden": self.golden,
-            "speed": self.speed,
-            "slow": self.slow,
-            "ghost": self.ghost,
-            "frenzy": self.frenzy,
-            "danger": self.danger,
-            "accent": self.accent,
-            "snake": self.snake_body,
-            "text": self.text,
-        }.get(role, self.accent)
+        Role names double as palette attribute names ("snake" is the one
+        exception), so this is a straight attribute lookup — called per
+        particle per frame, avoid building the mapping each time.
+        """
+
+        return getattr(self, "snake_body" if role == "snake" else role, self.accent)
 
     def snake_gradient(self, index: int, length: int) -> str:
         if index == 0:
