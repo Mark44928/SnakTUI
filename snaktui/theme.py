@@ -205,10 +205,162 @@ CANDY = Palette(
     danger="#ff4d6d",
 )
 
+# Real terminal color schemes, mapped to game roles with their official hex
+# values (draculatheme.com/spec, nordtheme.com, morhetz/gruvbox-contrib,
+# catppuccin.com/palette, folke/tokyonight.nvim, ethanschoonover.com/solarized).
+
+DRACULA = Palette(
+    key="dracula",
+    label="Dracula",
+    bg_a="#282a36",
+    bg_b="#21222c",
+    frame="#8be9fd",
+    frame_dim="#44475a",
+    snake_head="#f8f8f2",
+    snake_body="#50fa7b",
+    snake_tail="#bd93f9",
+    apple="#ff5555",
+    golden="#f1fa8c",
+    speed="#8be9fd",
+    slow="#6272a4",
+    frenzy="#ffb86c",
+    ghost="#d6acff",
+    obstacle="#44475a",
+    accent="#ff79c6",
+    accent2="#8be9fd",
+    text="#f8f8f2",
+    dim="#6272a4",
+    danger="#ff5555",
+)
+
+NORD = Palette(
+    key="nord",
+    label="Nord",
+    bg_a="#2e3440",
+    bg_b="#3b4252",
+    frame="#88c0d0",
+    frame_dim="#4c566a",
+    snake_head="#eceff4",
+    snake_body="#88c0d0",
+    snake_tail="#5e81ac",
+    apple="#bf616a",
+    golden="#ebcb8b",
+    speed="#8fbcbb",
+    slow="#81a1c1",
+    frenzy="#d08770",
+    ghost="#b48ead",
+    obstacle="#4c566a",
+    accent="#b48ead",
+    accent2="#88c0d0",
+    text="#d8dee9",
+    dim="#4c566a",
+    danger="#bf616a",
+)
+
+GRUVBOX = Palette(
+    key="gruvbox",
+    label="Gruvbox",
+    bg_a="#282828",
+    bg_b="#1d2021",
+    frame="#8ec07c",
+    frame_dim="#665c54",
+    snake_head="#ebdbb2",
+    snake_body="#8ec07c",
+    snake_tail="#d3869b",
+    apple="#fb4934",
+    golden="#fabd2f",
+    speed="#83a598",
+    slow="#689d6a",
+    frenzy="#fe8019",
+    ghost="#b16286",
+    obstacle="#665c54",
+    accent="#d3869b",
+    accent2="#8ec07c",
+    text="#ebdbb2",
+    dim="#a89984",
+    danger="#cc241d",
+)
+
+MOCHA = Palette(
+    key="mocha",
+    label="Catppuccin Mocha",
+    bg_a="#1e1e2e",
+    bg_b="#181825",
+    frame="#94e2d5",
+    frame_dim="#585b70",
+    snake_head="#cdd6f4",
+    snake_body="#94e2d5",
+    snake_tail="#cba6f7",
+    apple="#f38ba8",
+    golden="#f9e2af",
+    speed="#89dceb",
+    slow="#74c7ec",
+    frenzy="#fab387",
+    ghost="#b4befe",
+    obstacle="#45475a",
+    accent="#f5c2e7",
+    accent2="#89b4fa",
+    text="#cdd6f4",
+    dim="#6c7086",
+    danger="#f38ba8",
+)
+
+TOKYO = Palette(
+    key="tokyo",
+    label="Tokyo Night",
+    bg_a="#1a1b26",
+    bg_b="#16161e",
+    frame="#7aa2f7",
+    frame_dim="#292e42",
+    snake_head="#c0caf5",
+    snake_body="#7dcfff",
+    snake_tail="#73daca",
+    apple="#f7768e",
+    golden="#e0af68",
+    speed="#2ac3de",
+    slow="#7aa2f7",
+    frenzy="#ff9e64",
+    ghost="#bb9af7",
+    obstacle="#414868",
+    accent="#bb9af7",
+    accent2="#7dcfff",
+    text="#c0caf5",
+    dim="#565f89",
+    danger="#f7768e",
+)
+
+SOLARIZED = Palette(
+    key="solarized",
+    label="Solarized Dark",
+    bg_a="#002b36",
+    bg_b="#073642",
+    frame="#2aa198",
+    frame_dim="#586e75",
+    snake_head="#eee8d5",
+    snake_body="#2aa198",
+    snake_tail="#268bd2",
+    apple="#dc322f",
+    golden="#b58900",
+    speed="#268bd2",
+    slow="#6c71c4",
+    frenzy="#cb4b16",
+    ghost="#d33682",
+    obstacle="#586e75",
+    accent="#d33682",
+    accent2="#2aa198",
+    text="#839496",
+    dim="#657b83",
+    danger="#dc322f",
+)
+
 THEMES: dict[str, Palette] = {
-    palette.key: palette for palette in (NEON, AMBER, MATRIX, ICE, CANDY)
+    palette.key: palette
+    for palette in (NEON, AMBER, MATRIX, ICE, CANDY, DRACULA, NORD, GRUVBOX, MOCHA, TOKYO, SOLARIZED)
 }
-THEME_ORDER = ("neon", "amber", "matrix", "ice", "candy")
+THEME_ORDER = (
+    "neon", "amber", "matrix", "ice", "candy",
+    "dracula", "nord", "gruvbox", "mocha", "tokyo", "solarized",
+)
 
 
 def get_palette(key: str) -> Palette:
