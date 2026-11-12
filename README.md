@@ -3,7 +3,7 @@
 A feature-rich, visually striking modern **Snake** game for your terminal,
 built with **Python** and **[Textual](https://textual.textualize.io/)**.
 
-Neon gradients, particle bursts, combos, power-ups, hazards, five themes and a
+Neon gradients, particle bursts, combos, power-ups, hazards, eleven themes and a
 persistent local leaderboard — all rendered in pure Unicode blocks. No images,
 no browser, no GPU.
 
@@ -42,7 +42,9 @@ no browser, no GPU.
   expire.
 - **Progressive difficulty** — level up every 4 apples; speed climbs and
   hazards appear as you survive.
-- **Five themes** — Neon, Amber, Matrix, Ice and Candy.
+- **Eleven themes** — five hand-tuned palettes (Neon, Amber, Matrix, Ice,
+  Candy) and six real terminal schemes with their official colors: Dracula,
+  Nord, Gruvbox, Catppuccin Mocha, Tokyo Night and Solarized Dark.
 - **Three difficulties** — Chill, Classic and Insane.
 - **Persistent settings and top-10 leaderboard** stored as plain JSON.
 - **Responsive layout** — sidebar appears on wide terminals and hides on

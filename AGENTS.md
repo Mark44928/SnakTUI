@@ -35,6 +35,11 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
   `EFFECT_GLYPHS`, `board.FOOD_GLYPHS` and the help-screen `FOOD_ROWS` all
   cover the new kind; the HUD's `NEXT` level bar (`GameScreen._level_bar`) only
   renders at width ≥ 80.
+- v1.2.0: eleven themes in `theme.py` — five hand-tuned + six real terminal
+  schemes (Dracula, Nord, Gruvbox, Catppuccin Mocha, Tokyo Night, Solarized
+  Dark) with official hex values from their upstream palettes. `THEMES` and
+  `THEME_ORDER` must stay key-for-key in sync (tests assert it). Version is
+  declared in `pyproject.toml` and `snaktui/__init__.py` — keep both equal.
 
 ## Commands (Termux)
 
