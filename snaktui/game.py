@@ -422,20 +422,37 @@ class Game:
         head, target = self.head, self.food.pos
         if target == head:
             return
-        dx = (target.x > head.x) - (target.x < head.x)
-        dy = (target.y > head.y) - (target.y < head.y)
-        # Prefer the axis with the larger gap so diagonals close in straight-ish
-        # lines; try the second axis if the first is blocked.
-        candidates = (
-            [Point(target.x - dx, target.y), Point(target.x, target.y - dy)]
-            if abs(target.x - head.x) >= abs(target.y - head.y)
-            else [Point(target.x, target.y - dy), Point(target.x - dx, target.y)]
-        )
+
+        raw_dx = abs(target.x - head.x)
+        raw_dy = abs(target.y - head.y)
+        if self.config.wrap:
+            # shortest wrapped path wins; choose the step that closes the most ground
+            step_x = raw_dx if raw_dx <= self.width // 2 else self.width - raw_dx
+            step_y = raw_dy if raw_dy <= self.height // 2 else self.height - raw_dy
+            dx = 1 if ((target.x - head.x) % self.width) <= self.width // 2 else -1
+            dy = 1 if ((target.y - head.y) % self.height) <= self.height // 2 else -1
+            use_x = step_x >= step_y
+        else:
+            step_x, step_y = raw_dx, raw_dy
+            dx = (target.x > head.x) - (target.x < head.x)
+            dy = (target.y > head.y) - (target.y < head.y)
+            use_x = raw_dx >= raw_dy
+
+        def wrap(c: Point) -> Point:
+            return Point(c.x % self.width, c.y % self.height) if self.config.wrap else c
+
+        def inside(c: Point) -> bool:
+            return 0 <= c.x < self.width and 0 <= c.y < self.height
+
         occupied = set(self.snake) | self.obstacles
+        candidates = (
+            [wrap(Point(target.x - dx, target.y)), wrap(Point(target.x, target.y - dy))]
+            if use_x
+            else [wrap(Point(target.x, target.y - dy)), wrap(Point(target.x - dx, target.y))]
+        )
         for cell in candidates:
             if (
-                0 <= cell.x < self.width
-                and 0 <= cell.y < self.height
+                inside(cell)
                 and cell not in occupied
                 and (self.special is None or cell != self.special.pos)
             ):
