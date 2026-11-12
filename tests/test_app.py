@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import sys
 from pathlib import Path
+
+import pytest
 
 from snaktui.app import SnakTUI
 from snaktui.game import Game
@@ -174,3 +177,21 @@ def test_complete_run_skips_zero_score(tmp_path: Path) -> None:
     assert len(app.store.scores) == 1
     assert stats.new_high_score is True
     assert app.store.high_score == 123
+
+
+def test_cli_version_flag(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
+    from snaktui import __version__
+    from snaktui.app import main
+
+    monkeypatch.setattr(sys, "argv", ["snaktui", "--version"])
+    main()
+    assert capsys.readouterr().out.strip() == f"snaktui {__version__}"
+
+
+def test_cli_help_flag(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch) -> None:
+    from snaktui.app import main
+
+    monkeypatch.setattr(sys, "argv", ["snaktui", "--help"])
+    main()
+    out = capsys.readouterr().out
+    assert "usage" in out

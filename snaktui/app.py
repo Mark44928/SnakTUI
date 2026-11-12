@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+
 from textual.app import App
 from textual.binding import Binding
 from textual.theme import Theme
@@ -131,4 +133,14 @@ class SnakTUI(App):
 
 
 def main() -> None:
+    argv = sys.argv[1:]
+    if "--version" in argv or "-V" in argv:
+        from . import __version__
+
+        print(f"snaktui {__version__}")
+        return
+    if "--help" in argv or "-h" in argv:
+        print("usage: snaktui [--version]")
+        print("Snake for the terminal — run without flags to play.")
+        return
     SnakTUI().run()

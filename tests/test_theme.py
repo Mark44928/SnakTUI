@@ -82,3 +82,19 @@ def test_snake_gradient_endpoints() -> None:
     assert palette.snake_gradient(0, 10) == palette.snake_head
     assert palette.snake_gradient(1, 2) == palette.snake_body
     assert palette.snake_gradient(1, 10).startswith("#")
+
+
+def test_real_terminal_themes_use_official_colors() -> None:
+    """The six real schemes must carry the exact hexes from their upstreams."""
+    official = {
+        "dracula": {"bg_a": "#282a36", "frame": "#8be9fd", "accent": "#ff79c6", "snake_body": "#50fa7b"},
+        "nord": {"bg_a": "#2e3440", "frame": "#88c0d0", "snake_body": "#88c0d0"},
+        "gruvbox": {"bg_a": "#282828", "frame": "#8ec07c", "snake_head": "#ebdbb2"},
+        "mocha": {"bg_a": "#1e1e2e", "frame": "#94e2d5", "snake_tail": "#cba6f7"},
+        "tokyo": {"bg_a": "#1a1b26", "frame": "#7aa2f7", "snake_body": "#7dcfff"},
+        "solarized": {"bg_a": "#002b36", "frame": "#2aa198", "text": "#839496"},
+    }
+    for key, expected in official.items():
+        palette = THEMES[key]
+        for attr, hex_value in expected.items():
+            assert getattr(palette, attr) == hex_value, f"{key}.{attr}"

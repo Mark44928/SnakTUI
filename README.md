@@ -76,6 +76,9 @@ pip install -e .
 python -m snaktui
 ```
 
+If `textual` is already installed system-wide, the venv is optional —
+`python -m snaktui` works directly, and `--version` prints the release.
+
 ### Termux (Android)
 
 ```bash
