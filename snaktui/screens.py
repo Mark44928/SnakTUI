@@ -216,9 +216,10 @@ class MenuScreen(Screen):
                 label_style = f"bold {palette.text} on {background}"
                 value_style = f"bold {palette.accent2} on {background}"
             else:
-                marker_style = f"{palette.dim} on {background}"
-                label_style = f"{palette.dim} on {background}"
-                value_style = f"{palette.frame_dim} on {background}"
+                unselected = blend(palette.dim, palette.text, 0.38)
+                marker_style = f"{unselected} on {background}"
+                label_style = f"{unselected} on {background}"
+                value_style = f"{palette.dim} on {background}"
 
             line = Text()
             line.append(" ▶ " if selected else "   ", style=marker_style)
@@ -462,10 +463,11 @@ class GameScreen(Screen):
             flags.append("MUTE")
         if game.is_ready:
             flags.append("READY")
-        if game.paused:
-            flags.append("PAUSED")
         line_two.append(" · ".join(flags) + "   ", style=palette.frame_dim)
-        if game.combo < 2 and not game.paused and not game.game_over:
+        if game.paused:
+            line_two.append("⏸ PAUSED", style=f"bold {palette.golden}")
+            line_two.append("   ", style="")
+        elif game.combo < 2 and not game.game_over:
             line_two.append("eat fast for combos", style=palette.dim)
 
         hud.update(Text.assemble(line_one, "\n", line_two))
@@ -495,11 +497,14 @@ class GameScreen(Screen):
                 ("Q", "menu"),
                 ("M", "sound"),
             ]
-        for index, (key, action) in enumerate(hints):
-            hint_text.append(key + "  ", style=f"bold {palette.accent2}")
-            hint_text.append(action, style=palette.dim)
-            if index < len(hints) - 1:
-                hint_text.append("   ·   ", style=palette.frame_dim)
+        if game.paused:
+            hint_text.append("⏸ PAUSED — SPACE to resume · Q to quit", style=f"bold {palette.golden}")
+        else:
+            for index, (key, action) in enumerate(hints):
+                hint_text.append(key + "  ", style=f"bold {palette.accent2}")
+                hint_text.append(action, style=palette.dim)
+                if index < len(hints) - 1:
+                    hint_text.append("   ·   ", style=palette.frame_dim)
         hint.update(Text.assemble(hint_text))
 
     def _combo_bar(self, palette: Palette, width: int) -> Text:
@@ -673,7 +678,7 @@ class GameOverScreen(Screen):
             title = gradient_text("G A M E   O V E R", palette.danger, palette.accent, bold=True)
         self.query_one("#gameover-title", Static).update(title)
 
-        reason = Text(stats.reason, style=palette.dim)
+        reason = Text(stats.reason, style=f"bold {palette.text}")
         self.query_one("#gameover-reason", Static).update(reason)
 
         body = Text()
@@ -920,16 +925,17 @@ class HighScoresScreen(ModalScreen):
         scores = self.store.scores
         table = Text()
         if not scores:
-            table.append("\n  No runs yet — the arena awaits.\n", style=palette.dim)
-            table.append("  Play a run and claim the top spot.\n", style=palette.frame_dim)
+            table.append("\n  No runs yet — the arena awaits.\n", style=palette.text)
+            table.append("  Play a run and claim the top spot.\n", style=palette.dim)
         else:
             table.append(
                 f"{'#':<3}{'SCORE':>8}  {'LVL':>3}  {'LEN':>3}  {'MODE':<8}  DATE\n",
                 style=f"bold {palette.accent}",
             )
             for rank, entry in enumerate(scores, start=1):
-                table.append(f"{rank:<3}", style=palette.dim)
-                table.append(f"{entry.score:>8,}", style=f"bold {palette.text}")
+                top = rank == 1
+                table.append(f"{rank:<3}", style=f"bold {palette.golden}" if top else palette.dim)
+                table.append(f"{entry.score:>8,}", style=f"bold {palette.golden if top else palette.text}")
                 table.append(f"  {entry.level:>3}", style=palette.text)
                 table.append(f"  {entry.length:>3}", style=palette.text)
                 table.append(f"  {entry.difficulty[:8]:<8}", style=palette.accent2)
