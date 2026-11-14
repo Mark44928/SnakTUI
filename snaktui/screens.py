@@ -483,7 +483,8 @@ class GameScreen(Screen):
         hud.update(Text.assemble(line_one, "\n", line_two))
 
         if sidebar is not None:
-            sidebar.update(self._sidebar_text(palette))
+            self._last_sidebar = self._sidebar_text(palette)
+            sidebar.update(self._last_sidebar)
 
         hint_text = Text()
         if width < 60:

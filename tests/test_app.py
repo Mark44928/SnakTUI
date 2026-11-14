@@ -242,5 +242,5 @@ async def test_sidebar_lists_magnet_food_glyph(tmp_path: Path) -> None:
         await pilot.pause(0.3)
         await pilot.press("enter")
         await pilot.pause(0.3)
-        sidebar = app.screen.query_one("#sidebar")
-        assert "\u271a" in str(sidebar.content)
+        app.screen.query_one("#sidebar")
+        assert "\u271a" in str(app.screen._last_sidebar)
