@@ -1120,7 +1120,7 @@ class HelpScreen(ModalScreen):
         for line in (
             "Eat fast to build combos — the multiplier caps at x5.",
             "Level up every 4 apples. Golden food is rare and worth +50.",
-            "Speed / Slow / Ghost last a few seconds; Ghost phases walls.",
+            "Speed / Slow / Ghost / Frenzy / Magnet grant timed effects; Ghost phases through walls.",
         ):
             body.append(f"  · {line}\n", style=palette.dim)
         self.query_one("#help-body", Static).update(body)
