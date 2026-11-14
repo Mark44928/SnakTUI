@@ -181,8 +181,9 @@ class Game:
         if dt <= 0:
             return
         dt = min(dt, 0.25)
-        self._animate(dt)
-        if not self.running:
+        running = self.status is GameStatus.RUNNING
+        self._animate(dt, gameplay=running)
+        if not running:
             return
 
         if self.ready_timer > 0:
@@ -197,10 +198,14 @@ class Game:
             self._move_acc -= self.move_interval
             self._step()
             steps += 1
+        if steps >= 4:
+            # Drop the backlog rather than let a hitch accrue a permanent
+            # catch-up debt the simulation can never repay.
+            self._move_acc = min(self._move_acc, self.move_interval)
         if not self.running:
             self._move_acc = 0.0
 
-    def _animate(self, dt: float) -> None:
+    def _animate(self, dt: float, *, gameplay: bool = True) -> None:
         self._animation_time += dt
         self.flash = max(0.0, self.flash - dt)
 
@@ -215,6 +220,11 @@ class Game:
             popup.life -= dt
             popup.y -= 1.1 * dt
         self.popups = [p for p in self.popups if p.life > 0]
+
+        if not gameplay:
+            # Paused or over: freeze power-ups, combos and food timers so a
+            # break never burns an active effect, but keep particles drifting.
+            return
 
         for kind in list(self.effects):
             self.effects[kind] -= dt
@@ -456,7 +466,7 @@ class Game:
                 and cell not in occupied
                 and (self.special is None or cell != self.special.pos)
             ):
-                self.food = Food(self.food.kind, cell, ttl=self.food.ttl)
+                self.food = Food(self.food.kind, cell, age=self.food.age, ttl=self.food.ttl)
                 return
 
     def _spawn_obstacles(self, count: int) -> None:

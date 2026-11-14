@@ -140,7 +140,7 @@ def main() -> None:
         print(f"snaktui {__version__}")
         return
     if "--help" in argv or "-h" in argv:
-        print("usage: snaktui [--version]")
+        print("usage: snaktui [--version] [--help]")
         print("Snake for the terminal — run without flags to play.")
         return
     SnakTUI().run()

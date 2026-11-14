@@ -18,7 +18,7 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
 | `snaktui/screens.py` | All screens, HUD, sidebar, modals, key handling, and rendering. |
 | `snaktui/app.py` | App shell, adaptive board sizing, screen navigation, score saving. |
 | `snaktui/styles.tcss` | Layout and color CSS. |
-| `tests/` | Pytest suite (61 tests, headless — no TTY needed), including headless Textual smoke tests. |
+| `tests/` | Pytest suite (72 tests, headless — no TTY needed), including headless Textual smoke tests. |
 
 ## Invariants
 

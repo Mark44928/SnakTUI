@@ -363,3 +363,65 @@ def test_magnet_expires_and_stops_pulling() -> None:
     for _ in range(3):
         game.update(0.2)
     assert game.food.pos == resting
+
+
+def test_pause_freezes_effect_and_combo_timers() -> None:
+    game = make_game()
+    place_snake(game, Point(5, 5))
+    game.food = Food(FoodKind.APPLE, Point(2, 2))
+    game.effects[FoodKind.GHOST] = 3.0
+    game.combo = 4
+    game.combo_timer = 1.0
+
+    game.toggle_pause()
+    game.update(1.0)
+
+    assert game.effect_remaining(FoodKind.GHOST) == pytest.approx(3.0)
+    assert game.combo == 4
+    assert game.combo_timer == pytest.approx(1.0)
+
+    game.toggle_pause()
+    game.update(0.5)
+    assert game.effect_remaining(FoodKind.GHOST) < 3.0
+
+
+def test_special_timer_freezes_while_paused() -> None:
+    game = make_game()
+    place_snake(game, Point(5, 5))
+    game.food = Food(FoodKind.APPLE, Point(2, 2))
+    game.special = None
+    game._special_timer = 5.0
+
+    game.toggle_pause()
+    game.update(4.0)
+    assert game.special is None
+    assert game._special_timer == pytest.approx(5.0)
+
+
+def test_special_food_does_not_age_while_paused() -> None:
+    game = make_game()
+    game.special = Food(FoodKind.GOLDEN, Point(2, 2), ttl=1.0, age=0.0)
+    game.toggle_pause()
+    game.update(2.0)
+    assert game.special is not None
+    assert game.special.age == pytest.approx(0.0)
+
+
+def test_move_backlog_is_clamped_after_a_hitch() -> None:
+    # A long hitch must not bank an unbounded catch-up debt in _move_acc.
+    game = make_game(difficulty=DIFFICULTIES["insane"], obstacles=False)
+    game.level = 10
+    game.ready_timer = 0
+    game._move_acc = 100.0
+    game.update(0.25)
+    assert game._move_acc <= game.move_interval
+
+
+def test_magnet_pull_preserves_food_age() -> None:
+    game = make_game()
+    place_snake(game, Point(5, 5))
+    game.food = Food(FoodKind.APPLE, Point(14, 5), age=123.0)
+    game.effects[FoodKind.MAGNET] = 8.0
+    game.update(0.2)
+    assert game.food is not None
+    assert game.food.age >= 123.0
