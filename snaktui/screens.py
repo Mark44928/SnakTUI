@@ -28,7 +28,7 @@ from .models import (
     RunStats,
 )
 from .storage import Store
-from .theme import THEME_ORDER, Palette, blend, darken
+from .theme import THEME_ORDER, THEMES, Palette, blend, darken
 
 if TYPE_CHECKING:
     from .app import SnakTUI
@@ -127,6 +127,12 @@ class MenuScreen(Screen):
         if self._timer is not None:
             self._timer.stop()
 
+    def on_screen_resume(self) -> None:
+        # A modal may have changed the theme or difficulty; re-read the store.
+        self._refresh_values()
+        self._refresh_list()
+        self._refresh_logo()
+
     # -- rendering ---------------------------------------------------
     def _refresh_values(self) -> None:
         app = app_of(self)
@@ -168,6 +174,8 @@ class MenuScreen(Screen):
         footer.append("difficulty    ", style=palette.dim)
         footer.append("T  ", style=f"bold {palette.accent2}")
         footer.append("theme    ", style=palette.dim)
+        footer.append("P  ", style=f"bold {palette.accent2}")
+        footer.append("picker    ", style=palette.dim)
         footer.append("Q  ", style=f"bold {palette.accent2}")
         footer.append("quit", style=palette.dim)
         self.query_one("#menu-footer", Static).update(footer)
@@ -293,6 +301,8 @@ class MenuScreen(Screen):
             self.app.push_screen(HelpScreen())
         elif key in ("g", "l"):
             self.app.push_screen(HighScoresScreen(app_of(self).store))
+        elif key == "p":
+            self.app.push_screen(ThemeScreen(app_of(self).store))
         elif key == "q":
             self.app.exit()
         else:
@@ -794,6 +804,7 @@ class SettingsScreen(ModalScreen):
             ("Hazards", "on" if settings.obstacles else "off"),
             ("Grid", "on" if settings.grid else "off"),
             ("Sound", "on" if settings.sound else "off"),
+            ("Browse themes", "picker"),
             ("Reset high scores", ""),
             ("Back", ""),
         ]
@@ -806,6 +817,11 @@ class SettingsScreen(ModalScreen):
         self.query_one("#settings-title", Static).update(title)
 
         listing = Text()
+        listing.append("Theme   ", style=palette.dim)
+        for color in (palette.accent, palette.accent2, palette.golden, palette.speed, palette.danger):
+            listing.append("███", style=color)
+        listing.append("  " + palette.label, style=palette.dim)
+        listing.append("\n\n")
         for position, (label, value) in enumerate(self._options()):
             selected = position == self.index
             if selected:
@@ -872,6 +888,8 @@ class SettingsScreen(ModalScreen):
         label = self._options()[self.index][0]
         if label == "Back":
             self.dismiss()
+        elif label == "Browse themes":
+            self.app.push_screen(ThemeScreen(self.store))
         else:
             self._change(1)
 
@@ -892,6 +910,113 @@ class SettingsScreen(ModalScreen):
         elif key in ("enter", "space"):
             self.activate()
         elif key in ("escape", "backspace", "q"):
+            self.dismiss()
+        else:
+            return
+        event.stop()
+
+
+class ThemeScreen(ModalScreen):
+    """Palette picker with live preview; Esc restores the original theme."""
+
+    def __init__(self, store: Store) -> None:
+        super().__init__()
+        self.store = store
+        self.index = 0
+        self.original = ""
+
+    def compose(self) -> ComposeResult:
+        with Container(classes="modal-root"):
+            with Vertical(classes="modal-box theme-box"):
+                yield Static(id="theme-title")
+                yield Static(id="theme-list")
+                yield Static(id="theme-preview")
+                yield Static(id="theme-hint")
+
+    def on_mount(self) -> None:
+        app = app_of(self)
+        self.original = app.settings.theme
+        self.index = THEME_ORDER.index(app.settings.theme)
+        self._refresh()
+
+    def _move(self, step: int) -> None:
+        self.index = (self.index + step) % len(THEME_ORDER)
+        app_of(self).apply_settings(theme=THEME_ORDER[self.index])
+        self._refresh()
+
+    def _refresh(self) -> None:
+        app = app_of(self)
+        palette = app.palette
+        active = app.settings.theme
+
+        title = Text()
+        title.append("◆ ", style=f"bold {palette.accent}")
+        title.append("THEMES", style=f"bold {palette.text}")
+        title.append(f"  {self.index + 1}/{len(THEME_ORDER)}", style=palette.dim)
+        self.query_one("#theme-title", Static).update(title)
+
+        listing = Text()
+        for position, key in enumerate(THEME_ORDER):
+            themed = THEMES[key]
+            selected = position == self.index
+            listing.append(" ▶ " if selected else "   ", style=f"bold {palette.accent}")
+            for color in (themed.accent, themed.accent2, themed.golden, themed.speed, themed.danger):
+                listing.append("███", style=color)
+            style = f"bold {palette.text}" if selected else palette.dim
+            listing.append(f"  {themed.label:<15}", style=style)
+            if key == active:
+                listing.append("live", style=f"bold {palette.accent2}" if selected else palette.accent2)
+            listing.append("\n")
+        self.query_one("#theme-list", Static).update(listing)
+
+        themed = THEMES[THEME_ORDER[self.index]]
+        preview = Text()
+        preview.append("snake  ", style=themed.dim)
+        for i in range(22):
+            preview.append("█", style=themed.snake_gradient(i, 22))
+        preview.append("\n       ", style=themed.dim)
+        for glyph, color, label in (
+            ("● ", themed.apple, "apple"),
+            ("● ", themed.golden, "golden"),
+            ("● ", themed.speed, "speed"),
+            ("● ", themed.slow, "slow"),
+            ("●", themed.danger, "danger"),
+        ):
+            preview.append(glyph, style=color)
+            preview.append(f" {label}   ", style=themed.dim)
+        preview.append("\n       ")
+        preview.append("text  ", style=themed.text)
+        preview.append("dim  ", style=themed.dim)
+        preview.append("frame  ", style=themed.frame)
+        preview.append("accent", style=f"bold {themed.accent}")
+        self.query_one("#theme-preview", Static).update(preview)
+
+        hint = Text()
+        for keys, action in (
+            ("↑↓  ", "preview"),
+            ("←→  ", "±3"),
+            ("ENTER  ", "apply"),
+            ("ESC  ", "cancel"),
+        ):
+            hint.append(keys, style=f"bold {palette.accent2}")
+            hint.append(f"{action}   ", style=palette.dim)
+        self.query_one("#theme-hint", Static).update(hint)
+
+    def on_key(self, event: events.Key) -> None:
+        key = event.key
+        if key in ("up", "k"):
+            self._move(-1)
+        elif key in ("down", "j"):
+            self._move(1)
+        elif key in ("left", "h"):
+            self._move(-3)
+        elif key in ("right", "l"):
+            self._move(3)
+        elif key in ("enter", "space"):
+            app_of(self).apply_settings(theme=THEME_ORDER[self.index])
+            self.dismiss()
+        elif key in ("escape", "backspace", "q"):
+            app_of(self).apply_settings(theme=self.original)
             self.dismiss()
         else:
             return

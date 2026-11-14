@@ -208,6 +208,9 @@ CANDY = Palette(
 # Real terminal color schemes, mapped to game roles with their official hex
 # values (draculatheme.com/spec, nordtheme.com, morhetz/gruvbox-contrib,
 # catppuccin.com/palette, folke/tokyonight.nvim, ethanschoonover.com/solarized).
+# Muted (dim) roles are lifted toward each theme's text color where the upstream
+# dim is too dark to read as HUD text (Nord, Tokyo); danger uses the bright red
+# variant where the normal red is unreadable on the arena background (Gruvbox).
 
 DRACULA = Palette(
     key="dracula",
@@ -253,7 +256,7 @@ NORD = Palette(
     accent="#b48ead",
     accent2="#88c0d0",
     text="#d8dee9",
-    dim="#4c566a",
+    dim="#8b95a6",
     danger="#bf616a",
 )
 
@@ -278,7 +281,7 @@ GRUVBOX = Palette(
     accent2="#8ec07c",
     text="#ebdbb2",
     dim="#a89984",
-    danger="#cc241d",
+    danger="#fb4934",
 )
 
 MOCHA = Palette(
@@ -325,7 +328,7 @@ TOKYO = Palette(
     accent="#bb9af7",
     accent2="#7dcfff",
     text="#c0caf5",
-    dim="#565f89",
+    dim="#868fba",
     danger="#f7768e",
 )
 

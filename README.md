@@ -47,6 +47,8 @@ no browser, no GPU.
   Nord, Gruvbox, Catppuccin Mocha, Tokyo Night and Solarized Dark.
 - **Three difficulties** — Chill, Classic and Insane.
 - **Persistent settings and top-10 leaderboard** stored as plain JSON.
+- **Theme picker** — press `P` (or Settings → Browse themes) for a full list
+  with five-block swatches, a live arena preview, and Esc to cancel.
 - **Responsive layout** — sidebar appears on wide terminals and hides on
   narrow ones; the arena adapts to your terminal size.
 - **Keyboard-first** — full menu, settings, help and high-score screens.
@@ -118,6 +120,7 @@ rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/snaktui"
 | `Enter` / `Space` | Activate |
 | `D` | Cycle difficulty |
 | `T` | Cycle theme |
+| `P` | Theme picker (live preview) |
 | `S` | Settings |
 | `H` | How to play |
 | `G` / `L` | High scores |
@@ -134,6 +137,11 @@ rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/snaktui"
 | `Q` | Back to menu |
 
 ### Settings
+
+The header shows a live five-block swatch of the active palette (accent,
+accent2, golden, speed, danger) so you can see a theme before switching.
+**Browse themes** opens the full picker: `↑↓` previews live, `←→` jumps three,
+`Enter` applies, `Esc` restores the theme you started with.
 
 | Key | Action |
 | --- | --- |

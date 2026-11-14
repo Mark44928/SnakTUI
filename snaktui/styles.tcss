@@ -222,3 +222,30 @@ ScrollableContainer {
     scrollbar-color-active: $snake-golden;
     scrollbar-background: $snake-panel;
 }
+
+.theme-box {
+    max-width: 62;
+}
+
+#theme-title {
+    height: auto;
+    text-align: center;
+    text-style: bold;
+}
+
+#theme-list {
+    height: auto;
+    margin: 1 0;
+}
+
+#theme-preview {
+    height: auto;
+    border-top: solid $snake-frame-dim;
+    padding-top: 1;
+}
+
+#theme-hint {
+    height: 1;
+    text-align: center;
+    margin-top: 1;
+}

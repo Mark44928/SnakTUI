@@ -15,6 +15,7 @@ from snaktui.screens import (
     HighScoresScreen,
     MenuScreen,
     SettingsScreen,
+    ThemeScreen,
 )
 from snaktui.storage import Store
 
@@ -195,3 +196,39 @@ def test_cli_help_flag(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.M
     main()
     out = capsys.readouterr().out
     assert "usage" in out
+
+
+async def test_theme_picker_previews_and_cancel_restores(tmp_path: Path) -> None:
+    app = make_app(tmp_path)
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        start = app.settings.theme
+
+        await pilot.press("p")
+        await pilot.pause(0.2)
+        assert isinstance(app.screen, ThemeScreen)
+
+        await pilot.press("down")
+        await pilot.pause(0.2)
+        assert app.settings.theme != start
+
+        await pilot.press("escape")
+        await pilot.pause(0.2)
+        assert app.settings.theme == start
+        assert isinstance(app.screen, MenuScreen)
+
+
+async def test_theme_picker_enter_applies(tmp_path: Path) -> None:
+    app = make_app(tmp_path)
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        start = app.settings.theme
+
+        await pilot.press("p")
+        await pilot.pause(0.2)
+        await pilot.press("down", "enter")
+        await pilot.pause(0.2)
+
+        assert isinstance(app.screen, MenuScreen)
+        assert app.settings.theme != start
+        assert app.store.settings.theme == app.settings.theme
