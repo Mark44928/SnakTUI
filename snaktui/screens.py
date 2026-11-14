@@ -596,6 +596,7 @@ class GameScreen(Screen):
             FoodKind.SLOW,
             FoodKind.GHOST,
             FoodKind.FRENZY,
+            FoodKind.MAGNET,
         ):
             text.append(FOOD_GLYPHS[kind], style=f"bold {palette.role(kind.value)}")
         text.append("▓", style=f"bold {palette.obstacle}")

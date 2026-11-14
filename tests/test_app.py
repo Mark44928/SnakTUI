@@ -232,3 +232,15 @@ async def test_theme_picker_enter_applies(tmp_path: Path) -> None:
         assert isinstance(app.screen, MenuScreen)
         assert app.settings.theme != start
         assert app.store.settings.theme == app.settings.theme
+
+
+async def test_sidebar_lists_magnet_food_glyph(tmp_path: Path) -> None:
+    # v1.1.0 added the Magnet power-up; every other surface (help rows,
+    # board glyphs, boost bar) lists it, so the FOOD legend must too.
+    app = make_app(tmp_path)
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        await pilot.press("enter")
+        await pilot.pause(0.3)
+        sidebar = app.screen.query_one("#sidebar")
+        assert "\u271a" in str(sidebar.renderable)
