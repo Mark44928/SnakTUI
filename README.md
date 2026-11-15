@@ -62,6 +62,17 @@ no browser, no GPU.
 Requires **Python 3.10+** and a terminal with Unicode and truecolor support.
 A minimum of **80×24** is recommended; **100×30** or larger looks best.
 
+### Installer (isolated venv)
+
+```bash
+./install.sh                 # fzf menu when available
+./install.sh --no-menu       # non-interactive
+./install.sh --uninstall     # remove launcher + managed venv
+```
+
+It installs into `$XDG_DATA_HOME/snaktui/venv`, links a launcher into
+`$PREFIX/bin` on Termux or `~/.local/bin` elsewhere, and never installs fzf.
+
 ### From GitHub (recommended)
 
 ```bash
