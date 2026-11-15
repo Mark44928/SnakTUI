@@ -27,6 +27,16 @@ def default_data_dir() -> Path:
     return base / "snaktui"
 
 
+def _strict_bool(value: object, default: bool) -> bool:
+    # JSON "false"/"true" strings must not become truthy/falsy by accident;
+    # only real booleans and integral 0/1 are accepted.
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int | float) and value in (0, 1):
+        return bool(value)
+    return default
+
+
 @dataclass
 class Settings:
     """User preferences that survive between runs."""
@@ -37,6 +47,7 @@ class Settings:
     obstacles: bool = True
     grid: bool = True
     sound: bool = True
+    low_gfx: bool = False
 
     def sanitized(self) -> Settings:
         theme = self.theme if self.theme in THEMES else "neon"
@@ -45,10 +56,11 @@ class Settings:
             self,
             theme=theme,
             difficulty=difficulty,
-            wrap=bool(self.wrap),
-            obstacles=bool(self.obstacles),
-            grid=bool(self.grid),
-            sound=bool(self.sound),
+            wrap=_strict_bool(self.wrap, False),
+            obstacles=_strict_bool(self.obstacles, True),
+            grid=_strict_bool(self.grid, True),
+            sound=_strict_bool(self.sound, True),
+            low_gfx=_strict_bool(self.low_gfx, False),
         )
 
 
@@ -96,9 +108,13 @@ class Store:
                 if not isinstance(item, dict):
                     continue
                 try:
+                    entry_score = int(item["score"])
+                    if entry_score <= 0:
+                        # Zero/negative runs are never persisted; drop them on load too.
+                        continue
                     entries.append(
                         ScoreEntry(
-                            score=int(item["score"]),
+                            score=entry_score,
                             level=int(item.get("level", 1)),
                             length=int(item.get("length", 4)),
                             difficulty=str(item.get("difficulty", "classic")),

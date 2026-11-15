@@ -47,9 +47,13 @@ class SnakeBoard(Widget):
         palette = self.palette
         width, height = game.width, game.height
 
+        low = bool(getattr(getattr(self.app, "settings", None), "low_gfx", False))
         flash = min(1.0, game.flash / 0.75)
         row_bgs: list[str] = []
         for y in range(height):
+            if low:
+                row_bgs.append(palette.bg_a)
+                continue
             background = palette.bg_b if game.config.grid and y % 2 else palette.bg_a
             if flash > 0:
                 background = blend(background, palette.danger, flash * 0.28)
@@ -73,13 +77,17 @@ class SnakeBoard(Widget):
             point = snake[index]
             if not (0 <= point.x < width and 0 <= point.y < height):
                 continue
-            color = palette.snake_gradient(index, length)
+            color = palette.snake_body if low else palette.snake_gradient(index, length)
             if index == 0:
-                grid[point.y][point.x] = (SNAKE_CHAR, f"bold {color}", None)
+                grid[point.y][point.x] = (
+                    SNAKE_CHAR,
+                    f"bold {palette.snake_head if low else color}",
+                    None,
+                )
             else:
                 grid[point.y][point.x] = (SNAKE_CHAR, color, None)
 
-        if snake:
+        if snake and not low:
             head = snake[0]
             halo = darken(palette.snake_head, 0.45)
             for dx, dy in ((0, -1), (1, 0), (0, 1), (-1, 0)):
@@ -88,33 +96,52 @@ class SnakeBoard(Widget):
                     grid[y][x] = (HALO_CHAR, halo, None)
 
         if game.food is not None:
-            self._draw_food(grid, game.food.kind, game.food.pos, game.animation_time, 0.0)
+            if low:
+                point, kind = game.food.pos, game.food.kind
+                if 0 <= point.x < width and 0 <= point.y < height:
+                    grid[point.y][point.x] = (
+                        FOOD_GLYPHS[kind],
+                        f"bold {palette.role(kind.value)}",
+                        None,
+                    )
+            else:
+                self._draw_food(grid, game.food.kind, game.food.pos, game.animation_time, 0.0)
         if game.special is not None:
-            self._draw_food(
-                grid,
-                game.special.kind,
-                game.special.pos,
-                game.animation_time,
-                game.special.remaining,
-            )
+            if low:
+                point, kind = game.special.pos, game.special.kind
+                if 0 <= point.x < width and 0 <= point.y < height:
+                    grid[point.y][point.x] = (
+                        FOOD_GLYPHS[kind],
+                        f"bold {palette.role(kind.value)}",
+                        None,
+                    )
+            else:
+                self._draw_food(
+                    grid,
+                    game.special.kind,
+                    game.special.pos,
+                    game.animation_time,
+                    game.special.remaining,
+                )
 
-        for particle in game.particles:
-            x, y = round(particle.x), round(particle.y)
-            if not (0 <= x < width and 0 <= y < height):
-                continue
-            ratio = max(0.0, particle.life / particle.max_life)
-            color = blend(palette.bg_a, palette.role(particle.role), 0.35 + ratio * 0.65)
-            grid[y][x] = (particle.char, f"bold {color}", None)
+        if not low:
+            for particle in game.particles:
+                x, y = round(particle.x), round(particle.y)
+                if not (0 <= x < width and 0 <= y < height):
+                    continue
+                ratio = max(0.0, particle.life / particle.max_life)
+                color = blend(palette.bg_a, palette.role(particle.role), 0.35 + ratio * 0.65)
+                grid[y][x] = (particle.char, f"bold {color}", None)
 
-        for popup in game.popups:
-            y = round(popup.y)
-            if not (0 <= y < height):
-                continue
-            color = blend(palette.role(popup.role), "#ffffff", 0.25)
-            for offset, char in enumerate(popup.text):
-                x = round(popup.x) + offset
-                if 0 <= x < width:
-                    grid[y][x] = (char, f"bold {color}", None)
+            for popup in game.popups:
+                y = round(popup.y)
+                if not (0 <= y < height):
+                    continue
+                color = blend(palette.role(popup.role), "#ffffff", 0.25)
+                for offset, char in enumerate(popup.text):
+                    x = round(popup.x) + offset
+                    if 0 <= x < width:
+                        grid[y][x] = (char, f"bold {color}", None)
 
         if game.paused:
             self._draw_overlay(grid, width, height, "P A U S E D", "SPACE resume · Q quit")

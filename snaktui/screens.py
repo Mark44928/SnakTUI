@@ -806,6 +806,7 @@ class SettingsScreen(ModalScreen):
             ("Hazards", "on" if settings.obstacles else "off"),
             ("Grid", "on" if settings.grid else "off"),
             ("Sound", "on" if settings.sound else "off"),
+            ("Low graphics", "on" if settings.low_gfx else "off"),
             ("Browse themes", "picker"),
             ("Reset high scores", ""),
             ("Back", ""),
@@ -881,6 +882,8 @@ class SettingsScreen(ModalScreen):
             app.apply_settings(grid=not app.settings.grid)
         elif label == "Sound":
             app.apply_settings(sound=not app.settings.sound)
+        elif label == "Low graphics":
+            app.apply_settings(low_gfx=not app.settings.low_gfx)
         elif label == "Reset high scores":
             app.store.reset_scores()
             self.message = "High scores cleared."

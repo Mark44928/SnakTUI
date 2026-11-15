@@ -38,6 +38,8 @@ def test_settings_are_sanitized() -> None:
     assert settings.difficulty == "classic"
     assert settings.wrap is True
     assert settings.obstacles is False
+    assert settings.low_gfx is False
+    assert Settings(low_gfx="yes").sanitized().low_gfx is False
 
 
 def test_round_trip_persists_settings_and_scores(tmp_path: Path) -> None:
@@ -141,3 +143,39 @@ def test_zero_score_ignored_at_storage_layer(tmp_path: Path) -> None:
     store = Store(tmp_path / "state.json")
     assert store.add_score(make_entry(0, 1, 3, "Classic", "neon")) is False
     assert store.scores == []
+
+
+def test_string_bools_do_not_leak_into_settings(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    path.write_text(
+        json.dumps(
+            {
+                "settings": {"wrap": "false", "sound": "false", "grid": "yes", "obstacles": 1},
+            }
+        ),
+        encoding="utf-8",
+    )
+    store = Store(path)
+    assert store.settings.wrap is False
+    assert store.settings.sound is True  # field default, not truthy-string
+    assert store.settings.grid is True  # field default
+    assert store.settings.obstacles is True
+
+
+def test_non_positive_scores_are_dropped_on_load(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    path.write_text(
+        json.dumps(
+            {
+                "scores": [
+                    {"score": -50, "level": 1, "length": 4, "difficulty": "Classic"},
+                    {"score": 0, "level": 1, "length": 4, "difficulty": "Classic"},
+                    {"score": 120, "level": 2, "length": 6, "difficulty": "Classic"},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    store = Store(path)
+    assert [entry.score for entry in store.scores] == [120]
+    assert store.high_score == 120

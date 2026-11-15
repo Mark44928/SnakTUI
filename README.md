@@ -49,6 +49,8 @@ no browser, no GPU.
 - **Persistent settings and top-10 leaderboard** stored as plain JSON.
 - **Theme picker** — press `P` (or Settings → Browse themes) for a full list
   with five-block swatches, a live arena preview, and Esc to cancel.
+- **Low graphics mode** — one Settings toggle removes gradients, flash, pulses,
+  particles and score pop-ups for maximum terminal throughput.
 - **Responsive layout** — sidebar appears on wide terminals and hides on
   narrow ones; the arena adapts to your terminal size.
 - **Keyboard-first** — full menu, settings, help and high-score screens.
@@ -142,6 +144,9 @@ The header shows a live five-block swatch of the active palette (accent,
 accent2, golden, speed, danger) so you can see a theme before switching.
 **Browse themes** opens the full picker: `↑↓` previews live, `←→` jumps three,
 `Enter` applies, `Esc` restores the theme you started with.
+**Low graphics** strips the snake gradient, death flash, food pulse, halo and
+every particle/pop-up, and uses one flat background — a big win on slow
+terminals or remote SSH sessions.
 
 | Key | Action |
 | --- | --- |

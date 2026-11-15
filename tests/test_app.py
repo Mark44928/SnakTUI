@@ -244,3 +244,17 @@ async def test_sidebar_lists_magnet_food_glyph(tmp_path: Path) -> None:
         await pilot.pause(0.3)
         app.screen.query_one("#sidebar")
         assert "\u271a" in str(app.screen._last_sidebar)
+
+
+async def test_low_graphics_toggle_updates_store(tmp_path: Path) -> None:
+    app = make_app(tmp_path)
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        await pilot.press("s")
+        await pilot.pause(0.2)
+        for _ in range(6):
+            await pilot.press("down")
+        await pilot.press("enter")
+        await pilot.pause(0.2)
+        assert app.store.settings.low_gfx is True
+        assert app.settings.low_gfx is True

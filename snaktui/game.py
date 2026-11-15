@@ -178,7 +178,8 @@ class Game:
     def update(self, dt: float) -> None:
         """Advance the simulation by ``dt`` seconds."""
 
-        if dt <= 0:
+        if not dt > 0:
+            # Blocks NaN too: a NaN delta would poison _move_acc/elapsed forever.
             return
         dt = min(dt, 0.25)
         running = self.status is GameStatus.RUNNING

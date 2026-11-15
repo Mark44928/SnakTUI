@@ -425,3 +425,13 @@ def test_magnet_pull_preserves_food_age() -> None:
     game.update(0.2)
     assert game.food is not None
     assert game.food.age >= 123.0
+
+
+def test_nan_delta_is_ignored() -> None:
+    game = make_game()
+    game.update(float("nan"))
+    assert game.elapsed == 0.0
+    assert game.status is GameStatus.RUNNING
+    assert game._move_acc == 0.0
+    game.update(0.2)
+    assert game.head == Point(11, 6)
