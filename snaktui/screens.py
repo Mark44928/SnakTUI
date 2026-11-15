@@ -27,7 +27,7 @@ from .models import (
     GameStatus,
     RunStats,
 )
-from .storage import Store
+from .storage import ARENA_LABELS, ARENA_SIZES, Store
 from .theme import THEME_ORDER, THEMES, Palette, blend, darken
 
 if TYPE_CHECKING:
@@ -807,6 +807,7 @@ class SettingsScreen(ModalScreen):
             ("Grid", "on" if settings.grid else "off"),
             ("Sound", "on" if settings.sound else "off"),
             ("Low graphics", "on" if settings.low_gfx else "off"),
+            ("Arena", ARENA_LABELS[settings.arena]),
             ("Browse themes", "picker"),
             ("Reset high scores", ""),
             ("Back", ""),
@@ -884,6 +885,9 @@ class SettingsScreen(ModalScreen):
             app.apply_settings(sound=not app.settings.sound)
         elif label == "Low graphics":
             app.apply_settings(low_gfx=not app.settings.low_gfx)
+        elif label == "Arena":
+            position = ARENA_SIZES.index(app.settings.arena)
+            app.apply_settings(arena=ARENA_SIZES[(position + step) % len(ARENA_SIZES)])
         elif label == "Reset high scores":
             app.store.reset_scores()
             self.message = "High scores cleared."

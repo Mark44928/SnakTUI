@@ -16,6 +16,13 @@ from .models import DIFFICULTIES
 from .theme import THEMES
 
 MAX_SCORES = 10
+ARENA_SIZES = ("auto", "small", "medium", "large")
+ARENA_LABELS = {
+    "auto": "Auto",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+}
 
 
 def default_data_dir() -> Path:
@@ -48,10 +55,12 @@ class Settings:
     grid: bool = True
     sound: bool = True
     low_gfx: bool = False
+    arena: str = "auto"
 
     def sanitized(self) -> Settings:
         theme = self.theme if self.theme in THEMES else "neon"
         difficulty = self.difficulty if self.difficulty in DIFFICULTIES else "classic"
+        arena = self.arena if self.arena in ARENA_SIZES else "auto"
         return replace(
             self,
             theme=theme,
@@ -61,6 +70,7 @@ class Settings:
             grid=_strict_bool(self.grid, True),
             sound=_strict_bool(self.sound, True),
             low_gfx=_strict_bool(self.low_gfx, False),
+            arena=arena,
         )
 
 

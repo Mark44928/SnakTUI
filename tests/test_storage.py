@@ -179,3 +179,11 @@ def test_non_positive_scores_are_dropped_on_load(tmp_path: Path) -> None:
     store = Store(path)
     assert [entry.score for entry in store.scores] == [120]
     assert store.high_score == 120
+
+
+def test_arena_setting_round_trips_and_sanitizes(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    store = Store(path)
+    store.update_settings(arena="large")
+    assert Store(path).settings.arena == "large"
+    assert Settings(arena="nope").sanitized().arena == "auto"

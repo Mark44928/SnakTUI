@@ -258,3 +258,13 @@ async def test_low_graphics_toggle_updates_store(tmp_path: Path) -> None:
         await pilot.pause(0.2)
         assert app.store.settings.low_gfx is True
         assert app.settings.low_gfx is True
+
+
+async def test_arena_size_setting_caps_board(tmp_path: Path) -> None:
+    app = make_app(tmp_path, arena="small")
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        await pilot.press("enter")
+        await pilot.pause(0.3)
+        assert app.screen.game.width == 24
+        assert app.screen.game.height == 12

@@ -183,7 +183,9 @@ Settings and scores live in a single JSON document:
 3. `~/.local/share/snaktui/state.json` otherwise.
 
 Scores are sorted, capped at ten entries, and saved atomically. A corrupt or
-unreadable file is ignored instead of crashing the game.
+unreadable file is ignored instead of crashing the game. Settings include the
+arena size (Auto / Small / Medium / Large) — Auto fits the arena to your
+terminal, the others cap it at 24×12, 32×16 or 40×20 cells.
 
 ## Project layout
 

@@ -92,8 +92,14 @@ class SnakTUI(App):
         show_sidebar = width >= 76
         available_width = width - 4 - (25 if show_sidebar else 0)
         available_height = height - 5
-        grid_width = max(18, min(44, available_width))
-        grid_height = max(9, min(22, available_height))
+        presets = {"small": (24, 12), "medium": (32, 16), "large": (40, 20)}
+        preferred = presets.get(self.settings.arena)
+        if preferred is None:
+            grid_width = max(18, min(44, available_width))
+            grid_height = max(9, min(22, available_height))
+        else:
+            grid_width = max(18, min(44, available_width, preferred[0]))
+            grid_height = max(9, min(22, available_height, preferred[1]))
         return GameConfig(
             width=grid_width,
             height=grid_height,
