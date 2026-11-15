@@ -27,3 +27,6 @@ jobs:
         run: ruff check .
       - name: Test
         run: pytest -q
+      - name: Installer smoke test
+        if: matrix.python-version == '3.12'
+        run: bash tests/install-smoke.sh
