@@ -46,11 +46,18 @@ no browser, no GPU.
   Candy) and six real terminal schemes with their official colors: Dracula,
   Nord, Gruvbox, Catppuccin Mocha, Tokyo Night and Solarized Dark.
 - **Three difficulties** — Chill, Classic and Insane.
+- **Daily Challenge** — a date-seeded Classic run (fixed walls + hazards) so
+  everyone gets the same arena sequence; results are tagged `DAILY` in the
+  leaderboard and show the shareable seed on the results screen.
 - **Persistent settings and top-10 leaderboard** stored as plain JSON.
+- **Palette editor** — Settings → Edit palette; use arrows to recolor, `S` saves
+  it as a custom theme, and it persists in `state.json`
 - **Theme picker** — press `P` (or Settings → Browse themes) for a full list
   with five-block swatches, a live arena preview, and Esc to cancel.
 - **Low graphics mode** — one Settings toggle removes gradients, flash, pulses,
   particles and score pop-ups for maximum terminal throughput.
+- **Accessibility mode** — letter-coded food (A/G/S/W/H/F/M), high-contrast
+  glyphs, and no flashing or food pulse.
 - **Responsive layout** — sidebar appears on wide terminals and hides on
   narrow ones; the arena adapts to your terminal size.
 - **Keyboard-first** — full menu, settings, help and high-score screens.
@@ -134,6 +141,7 @@ rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/snaktui"
 | `D` | Cycle difficulty |
 | `T` | Cycle theme |
 | `P` | Theme picker (live preview) |
+| `Y` | Daily Challenge |
 | `S` | Settings |
 | `H` | How to play |
 | `G` / `L` | High scores |
@@ -148,6 +156,15 @@ rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/snaktui"
 | `R` | Restart run |
 | `M` | Toggle sound |
 | `Q` | Back to menu |
+
+### Daily Challenge
+
+Press `Y` on the menu (or choose **Daily Challenge**) for today's deterministic
+run. The board is seeded from the local date and always uses Classic difficulty,
+walls and hazards, so the spawn sequence is stable for the day. Daily scores
+carry a `DAILY` tag in the leaderboard, and the results screen shows the seed
+(`YYYYMMDD`) for sharing. Restarting or pressing **Play Again** keeps the same
+daily seed.
 
 ### Settings
 
@@ -264,8 +281,8 @@ Tiny, dependency-free tools from the same family:
 
 - [plusafetch](https://github.com/Mark44928/plusafetch) — C++23 fetch for Termux — ~23 ms, zero subprocesses on the default path
 - [Plusalator](https://github.com/Mark44928/Plusalator) — C++17 calculator REPL — Qalculate-flavored, ghost autosuggest, 18 themes
-- [GrubBlastersHTML](https://github.com/Mark44928/GrubBlastersHTML) — Worms-style artillery in one HTML file — 70 weapons, fully destructible terrain
-- [Easy-Termux-Package-Manager](https://github.com/Mark44928/Easy-Termux-Package-Manager) — fzf-driven package manager for Termux — snapshots, audit, 183 tests
+- [GrubBlastersHTML](https://github.com/Mark44928/GrubBlastersHTML) — Turn-based artillery in one HTML file — 72 weapons, fully destructible terrain
+- [Easy-Termux-Package-Manager](https://github.com/Mark44928/Easy-Termux-Package-Manager) — fzf-driven package manager for Termux — snapshots, audit, 186 tests
 - [NoNameOS](https://github.com/Mark44928/NoNameOS) — OS simulation in a single C++17 file — virtual FS, real shell
 - [Greenit](https://github.com/Mark44928/Greenit) — green-injected theme family — dark + light, single palette.json
 - [CalculaHTML](https://github.com/Mark44928/CalculaHTML) — static HTML calculator — 15 themes + System mode, zero deps

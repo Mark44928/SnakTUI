@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date
 from enum import Enum
 
 
@@ -180,6 +181,18 @@ DIFFICULTIES: dict[str, Difficulty] = {
 DIFFICULTY_ORDER = ("chill", "classic", "insane")
 
 
+def daily_seed() -> int:
+    """Stable seed for today's challenge (local calendar date)."""
+
+    return int(date.today().strftime("%Y%m%d"))
+
+
+def daily_label() -> str:
+    """Short label shown in the menu and results."""
+
+    return date.today().strftime("%b %d").upper()
+
+
 class GameStatus(Enum):
     RUNNING = "running"
     PAUSED = "paused"
@@ -208,6 +221,8 @@ class GameConfig:
     difficulty: Difficulty = DIFFICULTIES["classic"]
     theme: str = "neon"
     sound: bool = True
+    seed: int | None = None
+    daily: bool = False
 
 
 @dataclass(slots=True)
@@ -251,3 +266,5 @@ class RunStats:
     difficulty: str
     theme: str
     new_high_score: bool = False
+    daily: bool = False
+    seed: int | None = None

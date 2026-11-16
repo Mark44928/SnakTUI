@@ -9,7 +9,15 @@ from snaktui.models import (
     FoodKind,
     Point,
 )
-from snaktui.theme import THEME_ORDER, THEMES, blend, darken, get_palette, lighten
+from snaktui.theme import (
+    THEME_ORDER,
+    THEMES,
+    blend,
+    darken,
+    get_palette,
+    lighten,
+    palette_from_mapping,
+)
 
 
 def test_point_movement_and_wrapping() -> None:
@@ -61,6 +69,48 @@ def test_blend_clamps_and_accepts_short_hex() -> None:
 def test_invalid_color_raises() -> None:
     with pytest.raises(ValueError):
         blend("red", "#000000", 0.5)
+    with pytest.raises(ValueError):
+        blend("#12_34", "#000000", 0.5)
+    with pytest.raises(ValueError):
+        blend("#+1ffff", "#000000", 0.5)
+
+
+def _custom_palette_mapping(**overrides: object) -> dict[str, object]:
+    palette = THEMES["neon"]
+    mapping = {field: getattr(palette, field) for field in palette.__dataclass_fields__}
+    mapping.update(overrides)
+    return mapping
+
+
+def test_palette_from_mapping_accepts_valid() -> None:
+    palette = palette_from_mapping(_custom_palette_mapping(key="custom-ok", label="Mine"))
+    assert palette is not None
+    assert palette.key == "custom-ok"
+
+
+def test_palette_from_mapping_rejects_bad_colors() -> None:
+    assert palette_from_mapping(_custom_palette_mapping(key="custom-bad", bg_a="#12_34")) is None
+    assert palette_from_mapping(_custom_palette_mapping(key="custom-bad", bg_a="blue")) is None
+    assert palette_from_mapping(_custom_palette_mapping(key="custom-bad", accent="")) is None
+
+
+def test_palette_from_mapping_rejects_bad_keys() -> None:
+    assert palette_from_mapping(_custom_palette_mapping(key="")) is None
+    assert palette_from_mapping(_custom_palette_mapping(key="Custom Upper")) is None
+    assert palette_from_mapping(_custom_palette_mapping(key="custom spaces")) is None
+    assert palette_from_mapping(_custom_palette_mapping(key="neon")) is None
+    assert palette_from_mapping(_custom_palette_mapping(key="__proto__")) is None
+    assert palette_from_mapping(_custom_palette_mapping(key="x" * 33)) is None
+
+
+def test_palette_from_mapping_strips_label_controls() -> None:
+    palette = palette_from_mapping(
+        _custom_palette_mapping(key="custom-label", label="  Line\nBreak\x00Label  ")
+    )
+    assert palette is not None
+    assert "\n" not in palette.label
+    assert "\x00" not in palette.label
+    assert palette.label == "LineBreakLabel"
 
 
 def test_every_theme_is_complete() -> None:

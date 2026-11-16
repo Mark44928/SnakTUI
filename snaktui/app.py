@@ -9,7 +9,7 @@ from textual.binding import Binding
 from textual.theme import Theme
 
 from .game import Game
-from .models import DIFFICULTIES, GameConfig, RunStats
+from .models import DIFFICULTIES, GameConfig, RunStats, daily_seed
 from .screens import GameScreen, MenuScreen
 from .storage import Store, make_entry
 from .theme import THEMES, Palette, blend, get_palette
@@ -79,13 +79,13 @@ class SnakTUI(App):
     # ------------------------------------------------------------------
     # Screen navigation
     # ------------------------------------------------------------------
-    def new_game(self) -> None:
-        self.switch_screen(GameScreen(self.build_config(), self.store))
+    def new_game(self, daily: bool = False) -> None:
+        self.switch_screen(GameScreen(self.build_config(daily=daily), self.store))
 
     def show_menu(self) -> None:
         self.switch_screen(MenuScreen())
 
-    def build_config(self) -> GameConfig:
+    def build_config(self, daily: bool = False) -> GameConfig:
         width, height = self.size.width, self.size.height
         if width <= 0 or height <= 0:
             width, height = 80, 24
@@ -103,12 +103,14 @@ class SnakTUI(App):
         return GameConfig(
             width=grid_width,
             height=grid_height,
-            wrap=self.settings.wrap,
-            obstacles=self.settings.obstacles,
+            wrap=False if daily else self.settings.wrap,
+            obstacles=True if daily else self.settings.obstacles,
             grid=self.settings.grid,
-            difficulty=DIFFICULTIES[self.settings.difficulty],
+            difficulty=DIFFICULTIES["classic"] if daily else DIFFICULTIES[self.settings.difficulty],
             theme=self.settings.theme,
             sound=self.settings.sound,
+            seed=daily_seed() if daily else None,
+            daily=daily,
         )
 
     # ------------------------------------------------------------------
@@ -119,6 +121,8 @@ class SnakTUI(App):
         self.settings = self.store.settings
         theme_key = changes.get("theme")
         if isinstance(theme_key, str) and theme_key in THEMES:
+            if theme_key not in self.available_themes:
+                self.register_theme(build_theme(THEMES[theme_key]))
             self.theme = theme_key  # re-skins CSS chrome, not just Rich text
 
     def complete_run(self, game: Game) -> RunStats:
@@ -128,6 +132,7 @@ class SnakTUI(App):
             length=game.length,
             difficulty=game.difficulty.label,
             theme=game.config.theme,
+            daily=game.config.daily,
         )
         new_best = False
         if game.score > 0:

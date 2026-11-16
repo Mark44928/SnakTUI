@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 
+_HEX_COLOR = re.compile(r"#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})\Z")
+_THEME_KEY = re.compile(r"[a-z0-9][a-z0-9_-]{0,31}\Z")
+
 
 def _rgb(color: str) -> tuple[int, int, int]:
+    if not _HEX_COLOR.fullmatch(color):
+        raise ValueError(f"invalid color: {color!r}")
     value = color.lstrip("#")
     if len(value) == 3:
         value = "".join(ch * 2 for ch in value)
-    if len(value) != 6:
-        raise ValueError(f"invalid color: {color!r}")
     return int(value[0:2], 16), int(value[2:4], 16), int(value[4:6], 16)
 
 
@@ -360,11 +364,53 @@ THEMES: dict[str, Palette] = {
     palette.key: palette
     for palette in (NEON, AMBER, MATRIX, ICE, CANDY, DRACULA, NORD, GRUVBOX, MOCHA, TOKYO, SOLARIZED)
 }
-THEME_ORDER = (
-    "neon", "amber", "matrix", "ice", "candy",
-    "dracula", "nord", "gruvbox", "mocha", "tokyo", "solarized",
+BUILTIN_THEME_KEYS = tuple(THEMES)
+THEME_ORDER = list(BUILTIN_THEME_KEYS)
+
+# Curated swatches for the in-app palette editor.
+SWATCHES = (
+    "#05010f", "#0a0320", "#10151f", "#1e1e2e", "#282828", "#2e3440", "#002b36",
+    "#ffffff", "#e6f1ff", "#c4fffd", "#ffd166", "#ff3b6b", "#ff2bd6", "#22d3ee",
+    "#c084fc", "#7c3aed", "#50fa7b", "#ffb000", "#2de2e6", "#f7768e",
 )
 
 
 def get_palette(key: str) -> Palette:
     return THEMES.get(key, NEON)
+
+
+def register_theme(palette: Palette) -> None:
+    """Add a custom palette to the live theme list."""
+    THEMES[palette.key] = palette
+    if palette.key not in THEME_ORDER:
+        THEME_ORDER.append(palette.key)
+
+
+def palette_from_mapping(raw: dict[str, object]) -> Palette | None:
+    """Validate a persisted custom palette; return None when malformed."""
+    if not isinstance(raw, dict):
+        return None
+    key = raw.get("key")
+    label = raw.get("label")
+    if not isinstance(key, str) or not _THEME_KEY.fullmatch(key):
+        return None
+    if key.startswith("__") or key in BUILTIN_THEME_KEYS:
+        return None
+    if not isinstance(label, str):
+        return None
+    label = "".join(ch for ch in label if ch.isprintable()).strip()
+    if not label:
+        return None
+    values: dict[str, str] = {}
+    for field_name in Palette.__dataclass_fields__:
+        if field_name in ("key", "label"):
+            continue
+        value = raw.get(field_name)
+        if not isinstance(value, str):
+            return None
+        try:
+            _rgb(value)
+        except ValueError:
+            return None
+        values[field_name] = value
+    return Palette(key=key, label=label[:24], **values)

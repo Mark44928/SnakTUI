@@ -13,9 +13,10 @@ from datetime import datetime
 from pathlib import Path
 
 from .models import DIFFICULTIES
-from .theme import THEMES
+from .theme import THEMES, Palette, palette_from_mapping, register_theme
 
 MAX_SCORES = 10
+MAX_CUSTOM_THEMES = 64
 ARENA_SIZES = ("auto", "small", "medium", "large")
 ARENA_LABELS = {
     "auto": "Auto",
@@ -56,6 +57,7 @@ class Settings:
     sound: bool = True
     low_gfx: bool = False
     arena: str = "auto"
+    a11y: bool = False
 
     def sanitized(self) -> Settings:
         theme = self.theme if self.theme in THEMES else "neon"
@@ -71,6 +73,7 @@ class Settings:
             sound=_strict_bool(self.sound, True),
             low_gfx=_strict_bool(self.low_gfx, False),
             arena=arena,
+            a11y=_strict_bool(self.a11y, False),
         )
 
 
@@ -82,6 +85,7 @@ class ScoreEntry:
     difficulty: str
     theme: str
     date: str
+    daily: bool = False
 
 
 class Store:
@@ -91,6 +95,7 @@ class Store:
         self.path = path or default_data_dir() / "state.json"
         self.settings = Settings()
         self.scores: list[ScoreEntry] = []
+        self.custom_themes: list[dict[str, object]] = []
         self.load()
 
     # -- persistence -------------------------------------------------
@@ -101,6 +106,17 @@ class Store:
             return
         if not isinstance(raw, dict):
             return
+
+        raw_themes = raw.get("custom_themes")
+        if isinstance(raw_themes, list):
+            seen: set[str] = set()
+            for item in raw_themes[:MAX_CUSTOM_THEMES]:
+                palette = palette_from_mapping(item) if isinstance(item, dict) else None
+                if palette is None or palette.key in seen:
+                    continue
+                seen.add(palette.key)
+                register_theme(palette)
+                self.custom_themes.append(asdict(palette))
 
         raw_settings = raw.get("settings")
         if isinstance(raw_settings, dict):
@@ -130,6 +146,7 @@ class Store:
                             difficulty=str(item.get("difficulty", "classic")),
                             theme=str(item.get("theme", "neon")),
                             date=str(item.get("date", "")),
+                            daily=item.get("daily") is True,
                         )
                     )
                 except (KeyError, TypeError, ValueError):
@@ -143,6 +160,7 @@ class Store:
             "version": 1,
             "settings": asdict(self.settings),
             "scores": [asdict(entry) for entry in self.scores],
+            "custom_themes": self.custom_themes,
         }
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -185,6 +203,14 @@ class Store:
         self.save()
         return self.settings
 
+    def save_custom_theme(self, palette: Palette) -> None:
+        register_theme(palette)
+        entry = asdict(palette)
+        self.custom_themes = [t for t in self.custom_themes if t.get("key") != palette.key]
+        self.custom_themes.append(entry)
+        del self.custom_themes[:-MAX_CUSTOM_THEMES]
+        self.save()
+
 
 def make_entry(
     score: int,
@@ -192,6 +218,7 @@ def make_entry(
     length: int,
     difficulty: str,
     theme: str,
+    daily: bool = False,
 ) -> ScoreEntry:
     return ScoreEntry(
         score=score,
@@ -200,4 +227,5 @@ def make_entry(
         difficulty=difficulty,
         theme=theme,
         date=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        daily=daily,
     )

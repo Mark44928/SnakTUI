@@ -26,6 +26,16 @@ FOOD_GLYPHS: dict[FoodKind, str] = {
     FoodKind.MAGNET: "✚",
 }
 
+A11Y_FOOD_GLYPHS: dict[FoodKind, str] = {
+    FoodKind.APPLE: "A",
+    FoodKind.GOLDEN: "G",
+    FoodKind.SPEED: "S",
+    FoodKind.SLOW: "W",
+    FoodKind.GHOST: "H",
+    FoodKind.FRENZY: "F",
+    FoodKind.MAGNET: "M",
+}
+
 
 class SnakeBoard(Widget):
     """Renders the whole arena as a single Rich renderable."""
@@ -40,15 +50,19 @@ class SnakeBoard(Widget):
         self.styles.height = game.height + 2
         self.styles.border = ("round", palette.frame)
         self.border_title = "◆ SNAKTUI ARENA ◆"
-        self.border_subtitle = f"{game.difficulty.label} · {palette.label}"
+        mode = "DAILY · " if game.config.daily else ""
+        self.border_subtitle = f"{mode}{game.difficulty.label} · {palette.label}"
 
     def render(self) -> Text:
         game = self.game
         palette = self.palette
         width, height = game.width, game.height
 
-        low = bool(getattr(getattr(self.app, "settings", None), "low_gfx", False))
-        flash = min(1.0, game.flash / 0.75)
+        settings = getattr(self.app, "settings", None)
+        low = bool(getattr(settings, "low_gfx", False))
+        a11y = bool(getattr(settings, "a11y", False))
+        glyphs = A11Y_FOOD_GLYPHS if a11y else FOOD_GLYPHS
+        flash = 0.0 if a11y else min(1.0, game.flash / 0.75)
         row_bgs: list[str] = []
         for y in range(height):
             if low:
@@ -100,7 +114,7 @@ class SnakeBoard(Widget):
                 point, kind = game.food.pos, game.food.kind
                 if 0 <= point.x < width and 0 <= point.y < height:
                     grid[point.y][point.x] = (
-                        FOOD_GLYPHS[kind],
+                        glyphs[kind],
                         f"bold {palette.role(kind.value)}",
                         None,
                     )
@@ -111,7 +125,7 @@ class SnakeBoard(Widget):
                 point, kind = game.special.pos, game.special.kind
                 if 0 <= point.x < width and 0 <= point.y < height:
                     grid[point.y][point.x] = (
-                        FOOD_GLYPHS[kind],
+                        glyphs[kind],
                         f"bold {palette.role(kind.value)}",
                         None,
                     )
@@ -188,18 +202,21 @@ class SnakeBoard(Widget):
         remaining: float,
     ) -> None:
         palette = self.palette
+        settings = getattr(self.app, "settings", None)
+        a11y = bool(getattr(settings, "a11y", False))
+        glyphs = A11Y_FOOD_GLYPHS if a11y else FOOD_GLYPHS
         if not (0 <= point.x < self.game.width and 0 <= point.y < self.game.height):
             return
-        color = palette.role(kind.value)
-        glyph = FOOD_GLYPHS[kind]
-        pulse = 0.5 + 0.5 * math.sin(time * 6.0)
+        color = palette.text if a11y else palette.role(kind.value)
+        glyph = glyphs[kind]
+        pulse = 0.0 if a11y else 0.5 + 0.5 * math.sin(time * 6.0)
 
-        if kind is FoodKind.GOLDEN:
+        if kind is FoodKind.GOLDEN and not a11y:
             color = blend(palette.golden, "#ffffff", 0.15 + pulse * 0.45)
-        if remaining and remaining < 2.5 and int(time * 10) % 2 == 0:
+        if not a11y and remaining and remaining < 2.5 and int(time * 10) % 2 == 0:
             color = blend(color, palette.bg_a, 0.55)
 
-        background = blend(palette.bg_a, palette.role(kind.value), 0.18 + pulse * 0.08)
+        background = blend(palette.bg_a, palette.role(kind.value), 0.18 + pulse * 0.08) if not a11y else palette.bg_a
         grid[point.y][point.x] = (glyph, f"bold {color}", background)
 
     def _draw_overlay(

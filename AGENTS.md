@@ -18,7 +18,7 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
 | `snaktui/screens.py` | All screens, HUD, sidebar, modals, key handling, and rendering. |
 | `snaktui/app.py` | App shell, adaptive board sizing, screen navigation, score saving. |
 | `snaktui/styles.tcss` | Layout and color CSS. |
-| `tests/` | Pytest suite (72 tests, headless — no TTY needed), including headless Textual smoke tests. |
+| `tests/` | Pytest suite (88 tests, headless — no TTY needed), including headless Textual smoke tests. |
 
 ## Invariants
 
@@ -40,6 +40,10 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
   Dark) with official hex values from their upstream palettes. `THEMES` and
   `THEME_ORDER` must stay key-for-key in sync (tests assert it). Version is
   declared in `pyproject.toml` and `snaktui/__init__.py` — keep both equal.
+- v1.3.0: Daily Challenge is a deterministic Classic run seeded from the local
+  date (`models.daily_seed`), with walls and hazards forced on. Daily scores
+  carry `ScoreEntry.daily`; `GameScreen` restart and `GameOverScreen` replay
+  must preserve `GameConfig.daily` so the seed does not silently become random.
 
 ## Commands (Termux)
 

@@ -12,10 +12,11 @@ from rich.text import Text
 from textual import events
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, ScrollableContainer, Vertical
+from textual.css.query import NoMatches
 from textual.screen import ModalScreen, Screen
 from textual.widgets import Static
 
-from .board import FOOD_GLYPHS, SnakeBoard
+from .board import A11Y_FOOD_GLYPHS, FOOD_GLYPHS, SnakeBoard
 from .game import LEVEL_EVERY, Game
 from .models import (
     DIFFICULTIES,
@@ -26,9 +27,10 @@ from .models import (
     GameConfig,
     GameStatus,
     RunStats,
+    daily_label,
 )
 from .storage import ARENA_LABELS, ARENA_SIZES, Store
-from .theme import THEME_ORDER, THEMES, Palette, blend, darken
+from .theme import SWATCHES, THEME_ORDER, THEMES, Palette, blend, darken
 
 if TYPE_CHECKING:
     from .app import SnakTUI
@@ -65,6 +67,13 @@ def format_time(seconds: float) -> str:
 
 def app_of(screen: Screen) -> SnakTUI:
     return screen.app  # type: ignore[return-value]
+
+
+def a11y_glyphs(app: object) -> dict[FoodKind, str]:
+    settings = getattr(app, "settings", None)
+    if getattr(settings, "a11y", False):
+        return A11Y_FOOD_GLYPHS
+    return FOOD_GLYPHS
 
 
 def gradient_text(
@@ -141,6 +150,7 @@ class MenuScreen(Screen):
         high = app.store.high_score
         self.items = [
             ("PLAY", ""),
+            ("DAILY CHALLENGE", daily_label()),
             ("DIFFICULTY", difficulty.label),
             ("THEME", palette.label),
             ("SETTINGS", f"wrap {'on' if app.settings.wrap else 'off'}"),
@@ -176,6 +186,8 @@ class MenuScreen(Screen):
         footer.append("theme    ", style=palette.dim)
         footer.append("P  ", style=f"bold {palette.accent2}")
         footer.append("picker    ", style=palette.dim)
+        footer.append("Y  ", style=f"bold {palette.accent2}")
+        footer.append("daily    ", style=palette.dim)
         footer.append("Q  ", style=f"bold {palette.accent2}")
         footer.append("quit", style=palette.dim)
         self.query_one("#menu-footer", Static).update(footer)
@@ -268,6 +280,8 @@ class MenuScreen(Screen):
         item = self.items[self.index][0]
         if item == "PLAY":
             app_of(self).new_game()
+        elif item == "DAILY CHALLENGE":
+            app_of(self).new_game(daily=True)
         elif item == "DIFFICULTY":
             self._cycle_difficulty()
         elif item == "THEME":
@@ -303,6 +317,8 @@ class MenuScreen(Screen):
             self.app.push_screen(HighScoresScreen(app_of(self).store))
         elif key == "p":
             self.app.push_screen(ThemeScreen(app_of(self).store))
+        elif key == "y":
+            app_of(self).new_game(daily=True)
         elif key == "q":
             self.app.exit()
         else:
@@ -466,6 +482,8 @@ class GameScreen(Screen):
                 line_two.append(EFFECT_GLYPHS[kind] + " ", style=f"bold {palette.role(kind.value)}")
                 line_two.append(f"{remaining:3.1f}s  ", style=palette.role(kind.value))
         flags = []
+        if self.config.daily:
+            flags.append("DAILY")
         flags.append("WRAP" if self.config.wrap else "WALLS")
         if self.config.obstacles:
             flags.append("HAZ")
@@ -590,6 +608,7 @@ class GameScreen(Screen):
             style=palette.text,
         )
         text.append("FOOD  ", style=f"bold {palette.accent}")
+        legend = a11y_glyphs(self.app)
         for kind in (
             FoodKind.APPLE,
             FoodKind.GOLDEN,
@@ -599,7 +618,7 @@ class GameScreen(Screen):
             FoodKind.FRENZY,
             FoodKind.MAGNET,
         ):
-            text.append(FOOD_GLYPHS[kind], style=f"bold {palette.role(kind.value)}")
+            text.append(legend[kind], style=f"bold {palette.role(kind.value)}")
         text.append("▓", style=f"bold {palette.obstacle}")
 
         if game.height >= 20:
@@ -620,7 +639,7 @@ class GameScreen(Screen):
     def query_optional_one(self, selector: str) -> Static | None:
         try:
             return self.query_one(selector, Static)
-        except Exception:
+        except NoMatches:
             return None
 
     # -- input & actions --------------------------------------------
@@ -652,7 +671,7 @@ class GameScreen(Screen):
         app_of(self).show_menu()
 
     def action_restart_run(self) -> None:
-        app_of(self).new_game()
+        app_of(self).new_game(daily=self.config.daily)
 
     def action_toggle_sound(self) -> None:
         app = app_of(self)
@@ -694,7 +713,7 @@ class GameOverScreen(Screen):
         self.query_one("#gameover-reason", Static).update(reason)
 
         body = Text()
-        rows = (
+        rows = [
             ("SCORE", f"{stats.score:,}"),
             ("PERSONAL BEST", f"{stats.best:,}"),
             ("LEVEL", str(stats.level)),
@@ -703,7 +722,9 @@ class GameOverScreen(Screen):
             ("MAX COMBO", f"x{stats.max_combo}"),
             ("TIME", format_time(stats.elapsed)),
             ("DIFFICULTY", stats.difficulty),
-        )
+        ]
+        if stats.daily:
+            rows.extend((("MODE", "DAILY"), ("SEED", str(stats.seed))))
         width = 22
         for label, value in rows:
             body.append(f"{label:<14}", style=palette.dim)
@@ -748,7 +769,7 @@ class GameOverScreen(Screen):
     def activate(self) -> None:
         app = app_of(self)
         if self.index == 0:
-            app.new_game()
+            app.new_game(daily=self.stats.daily)
         elif self.index == 1:
             self.app.push_screen(HighScoresScreen(app.store))
         else:
@@ -765,7 +786,7 @@ class GameOverScreen(Screen):
         elif key in ("enter", "space"):
             self.activate()
         elif key == "r":
-            app_of(self).new_game()
+            app_of(self).new_game(daily=self.stats.daily)
         elif key in ("m", "q", "escape"):
             app_of(self).show_menu()
         elif key == "l":
@@ -807,8 +828,10 @@ class SettingsScreen(ModalScreen):
             ("Grid", "on" if settings.grid else "off"),
             ("Sound", "on" if settings.sound else "off"),
             ("Low graphics", "on" if settings.low_gfx else "off"),
+            ("Accessibility", "on" if settings.a11y else "off"),
             ("Arena", ARENA_LABELS[settings.arena]),
             ("Browse themes", "picker"),
+            ("Edit palette", "editor"),
             ("Reset high scores", ""),
             ("Back", ""),
         ]
@@ -885,6 +908,8 @@ class SettingsScreen(ModalScreen):
             app.apply_settings(sound=not app.settings.sound)
         elif label == "Low graphics":
             app.apply_settings(low_gfx=not app.settings.low_gfx)
+        elif label == "Accessibility":
+            app.apply_settings(a11y=not app.settings.a11y)
         elif label == "Arena":
             position = ARENA_SIZES.index(app.settings.arena)
             app.apply_settings(arena=ARENA_SIZES[(position + step) % len(ARENA_SIZES)])
@@ -899,6 +924,8 @@ class SettingsScreen(ModalScreen):
             self.dismiss()
         elif label == "Browse themes":
             self.app.push_screen(ThemeScreen(self.store))
+        elif label == "Edit palette":
+            self.app.push_screen(PaletteEditorScreen(self.store))
         else:
             self._change(1)
 
@@ -945,7 +972,10 @@ class ThemeScreen(ModalScreen):
     def on_mount(self) -> None:
         app = app_of(self)
         self.original = app.settings.theme
-        self.index = THEME_ORDER.index(app.settings.theme)
+        try:
+            self.index = THEME_ORDER.index(app.settings.theme)
+        except ValueError:
+            self.index = 0
         self._refresh()
 
     def _move(self, step: int) -> None:
@@ -1032,6 +1062,121 @@ class ThemeScreen(ModalScreen):
         event.stop()
 
 
+PALETTE_ROLES = (
+    ("Background A", "bg_a"),
+    ("Background B", "bg_b"),
+    ("Frame", "frame"),
+    ("Snake head", "snake_head"),
+    ("Snake body", "snake_body"),
+    ("Snake tail", "snake_tail"),
+    ("Apple", "apple"),
+    ("Golden", "golden"),
+    ("Accent", "accent"),
+    ("Text", "text"),
+    ("Danger", "danger"),
+)
+
+
+class PaletteEditorScreen(ModalScreen):
+    """Cycle palette swatches and save the result as a custom theme."""
+
+    def __init__(self, store: Store) -> None:
+        super().__init__()
+        self.store = store
+        self.index = 0
+
+    def compose(self) -> ComposeResult:
+        with Container(classes="modal-root"):
+            with Vertical(classes="modal-box theme-box"):
+                yield Static(id="palette-title")
+                yield Static(id="palette-list")
+                yield Static(id="palette-preview")
+                yield Static(id="palette-hint")
+
+    def on_mount(self) -> None:
+        self.working = app_of(self).palette
+        self._refresh()
+
+    def _refresh(self) -> None:
+        palette = app_of(self).palette
+        title = Text()
+        title.append("◆ ", style=f"bold {palette.accent}")
+        title.append("PALETTE EDITOR", style=f"bold {palette.text}")
+        self.query_one("#palette-title", Static).update(title)
+
+        listing = Text()
+        for position, (label, attr) in enumerate(PALETTE_ROLES):
+            selected = position == self.index
+            listing.append(" ▶ " if selected else "   ", style=f"bold {palette.accent}")
+            listing.append("███ ", style=getattr(self.working, attr))
+            listing.append(f"{label:<14}", style=f"bold {palette.text}" if selected else palette.dim)
+            listing.append(getattr(self.working, attr) + "\n", style=palette.frame_dim)
+        self.query_one("#palette-list", Static).update(listing)
+
+        preview = Text()
+        preview.append("\n  snake  ", style=self.working.dim)
+        for i in range(20):
+            preview.append("█", style=self.working.snake_gradient(i, 20))
+        preview.append("\n  foods  ", style=self.working.dim)
+        for attr in ("apple", "golden", "accent", "text", "danger"):
+            preview.append("██ ", style=getattr(self.working, attr))
+        preview.append("\n")
+        self.query_one("#palette-preview", Static).update(preview)
+
+        hint = Text()
+        for keys, action in (
+            ("↑↓  ", "row"),
+            ("←→  ", "color"),
+            ("S  ", "save"),
+            ("ESC  ", "cancel"),
+        ):
+            hint.append(keys, style=f"bold {palette.accent2}")
+            hint.append(f"{action}   ", style=palette.dim)
+        self.query_one("#palette-hint", Static).update(hint)
+
+    def _cycle(self, step: int) -> None:
+        attr = PALETTE_ROLES[self.index][1]
+        current = getattr(self.working, attr)
+        try:
+            position = SWATCHES.index(current)
+        except ValueError:
+            position = 0
+        color = SWATCHES[(position + step) % len(SWATCHES)]
+        self.working = replace(self.working, **{attr: color})
+        self._refresh()
+
+    def _save(self) -> None:
+        app = app_of(self)
+        used = {t.get("key") for t in self.store.custom_themes}
+        n = 1
+        while f"custom-{n}" in used or f"custom-{n}" in THEMES:
+            n += 1
+        palette = replace(self.working, key=f"custom-{n}", label=f"Custom {n}")
+        self.store.save_custom_theme(palette)
+        app.apply_settings(theme=palette.key)
+        self.dismiss()
+
+    def on_key(self, event: events.Key) -> None:
+        key = event.key
+        if key in ("up", "k"):
+            self.index = (self.index - 1) % len(PALETTE_ROLES)
+            self._refresh()
+        elif key in ("down", "j"):
+            self.index = (self.index + 1) % len(PALETTE_ROLES)
+            self._refresh()
+        elif key in ("left", "h"):
+            self._cycle(-1)
+        elif key in ("right", "l"):
+            self._cycle(1)
+        elif key == "s":
+            self._save()
+        elif key in ("escape", "backspace", "q"):
+            self.dismiss()
+        else:
+            return
+        event.stop()
+
+
 class HighScoresScreen(ModalScreen):
     """Local leaderboard."""
 
@@ -1072,7 +1217,8 @@ class HighScoresScreen(ModalScreen):
                 table.append(f"{entry.score:>8,}", style=f"bold {palette.golden if top else palette.text}")
                 table.append(f"  {entry.level:>3}", style=palette.text)
                 table.append(f"  {entry.length:>3}", style=palette.text)
-                table.append(f"  {entry.difficulty[:8]:<8}", style=palette.accent2)
+                mode = "DAILY" if entry.daily else entry.difficulty[:8]
+                table.append(f"  {mode:<8}", style=palette.accent2)
                 table.append(f"  {entry.date}\n", style=palette.dim)
         self.query_one("#scores-table", Static).update(table)
         hint = Text("ESC / Q  back", style=palette.dim)
@@ -1116,8 +1262,9 @@ class HelpScreen(ModalScreen):
             body.append(f"{description}\n", style=palette.dim)
 
         body.append("\nFOOD & POWER-UPS\n", style=f"bold {palette.accent}")
+        legend = a11y_glyphs(self.app)
         for kind, name, score, note in FOOD_ROWS:
-            body.append(f"  {FOOD_GLYPHS[kind]} ", style=f"bold {palette.role(kind.value)}")
+            body.append(f"  {legend[kind]} ", style=f"bold {palette.role(kind.value)}")
             body.append(f"{name:<10}", style=f"bold {palette.text}")
             body.append(f"{score:>4}  ", style=palette.accent2)
             body.append(f"{note}\n", style=palette.dim)

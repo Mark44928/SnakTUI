@@ -435,3 +435,25 @@ def test_nan_delta_is_ignored() -> None:
     assert game._move_acc == 0.0
     game.update(0.2)
     assert game.head == Point(11, 6)
+
+
+def test_seeded_daily_run_is_reproducible() -> None:
+    config = GameConfig(
+        width=20,
+        height=12,
+        obstacles=True,
+        difficulty=DIFFICULTIES["classic"],
+        seed=20261116,
+        daily=True,
+    )
+    first = Game(config)
+    second = Game(config)
+    assert first.food == second.food
+    assert first.obstacles == second.obstacles
+    first.ready_timer = second.ready_timer = 0
+    first.update(0.2)
+    second.update(0.2)
+    assert first.head == second.head
+    assert first.food == second.food
+    assert first.stats(0).daily is True
+    assert first.stats(0).seed == 20261116

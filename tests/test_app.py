@@ -7,13 +7,14 @@ import pytest
 
 from snaktui.app import SnakTUI
 from snaktui.game import Game
-from snaktui.models import GameConfig
+from snaktui.models import GameConfig, daily_seed
 from snaktui.screens import (
     GameOverScreen,
     GameScreen,
     HelpScreen,
     HighScoresScreen,
     MenuScreen,
+    PaletteEditorScreen,
     SettingsScreen,
     ThemeScreen,
 )
@@ -165,6 +166,21 @@ async def test_build_config_adapts_to_size(tmp_path: Path) -> None:
         assert config.height == 19
 
 
+async def test_daily_challenge_starts_seeded_classic_run(tmp_path: Path) -> None:
+    app = make_app(tmp_path, difficulty="insane", wrap=True, obstacles=False)
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        await pilot.press("y")
+        await pilot.pause(0.3)
+        assert isinstance(app.screen, GameScreen)
+        config = app.screen.config
+        assert config.daily is True
+        assert config.seed == daily_seed()
+        assert config.difficulty.key == "classic"
+        assert config.wrap is False
+        assert config.obstacles is True
+
+
 def test_complete_run_skips_zero_score(tmp_path: Path) -> None:
     app = make_app(tmp_path)
     game = Game(GameConfig())
@@ -268,3 +284,21 @@ async def test_arena_size_setting_caps_board(tmp_path: Path) -> None:
         await pilot.pause(0.3)
         assert app.screen.game.width == 24
         assert app.screen.game.height == 12
+
+
+async def test_palette_editor_saves_custom_theme(tmp_path: Path) -> None:
+    app = make_app(tmp_path)
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        await pilot.press("s")
+        await pilot.pause(0.2)
+        for _ in range(10):
+            await pilot.press("down")
+        await pilot.press("enter")
+        await pilot.pause(0.2)
+        assert isinstance(app.screen, PaletteEditorScreen)
+        await pilot.press("right", "s")
+        await pilot.pause(0.2)
+        assert app.settings.theme.startswith("custom-")
+        assert app.store.settings.theme == app.settings.theme
+        assert any(t.get("key") == app.settings.theme for t in app.store.custom_themes)

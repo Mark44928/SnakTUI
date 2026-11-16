@@ -187,3 +187,35 @@ def test_arena_setting_round_trips_and_sanitizes(tmp_path: Path) -> None:
     store.update_settings(arena="large")
     assert Store(path).settings.arena == "large"
     assert Settings(arena="nope").sanitized().arena == "auto"
+
+
+def test_custom_theme_round_trips(tmp_path: Path) -> None:
+    from dataclasses import replace
+
+    from snaktui.theme import THEMES
+
+    path = tmp_path / "state.json"
+    store = Store(path)
+    palette = replace(THEMES["neon"], key="custom-test", label="Custom Test", accent="#123456")
+    store.save_custom_theme(palette)
+    store.update_settings(theme="custom-test")
+
+    loaded = Store(path)
+    assert loaded.settings.theme == "custom-test"
+    assert any(item["key"] == "custom-test" for item in loaded.custom_themes)
+    assert THEMES["custom-test"].accent == "#123456"
+
+
+def test_accessibility_setting_sanitizes() -> None:
+    assert Settings(a11y=1).sanitized().a11y is True
+    assert Settings(a11y="yes").sanitized().a11y is False
+
+
+def test_daily_score_marker_round_trips(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    store = Store(path)
+    store.add_score(make_entry(250, 3, 9, "Classic", "neon", daily=True))
+
+    loaded = Store(path)
+    assert loaded.scores[0].daily is True
+    assert loaded.scores[0].score == 250

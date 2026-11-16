@@ -40,7 +40,7 @@ class Game:
         self.config = config
         self.width = max(14, config.width)
         self.height = max(9, config.height)
-        self.rng = rng or random.Random()
+        self.rng = rng or random.Random(config.seed)
         self.difficulty = config.difficulty
 
         center_x, center_y = self.width // 2, self.height // 2
@@ -551,6 +551,8 @@ class Game:
             difficulty=self.difficulty.label,
             theme=self.config.theme,
             new_high_score=new_high_score,
+            daily=self.config.daily,
+            seed=self.config.seed,
         )
 
 
