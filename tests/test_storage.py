@@ -11,6 +11,8 @@ from snaktui.storage import (
     Store,
     default_data_dir,
     make_entry,
+    make_share_code,
+    parse_share_code,
 )
 
 
@@ -219,3 +221,14 @@ def test_daily_score_marker_round_trips(tmp_path: Path) -> None:
     loaded = Store(path)
     assert loaded.scores[0].daily is True
     assert loaded.scores[0].score == 250
+
+
+def test_share_code_round_trips() -> None:
+    code = make_share_code(420, 5, 18, "Classic", "neon", daily=True, seed=20261116)
+    assert code.startswith("SNAK1-")
+    payload = parse_share_code(code)
+    assert payload is not None
+    assert payload["score"] == 420
+    assert payload["daily"] is True
+    assert payload["seed"] == 20261116
+    assert parse_share_code("not-a-code") is None

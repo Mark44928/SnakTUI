@@ -163,6 +163,12 @@ ModalScreen {
     margin-bottom: 1;
 }
 
+#gameover-code {
+    height: auto;
+    text-align: center;
+    margin-bottom: 1;
+}
+
 #gameover-actions {
     height: auto;
     margin-bottom: 1;

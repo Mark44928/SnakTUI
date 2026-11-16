@@ -6,6 +6,7 @@ never in a system path. Set ``SNAKTUI_DATA_DIR`` to override the location.
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 from dataclasses import asdict, dataclass, fields, replace
@@ -229,3 +230,35 @@ def make_entry(
         date=datetime.now().strftime("%Y-%m-%d %H:%M"),
         daily=daily,
     )
+
+
+def make_share_code(score, level, length, difficulty, theme, daily=False, seed=None):
+    payload = {
+        "v": 1,
+        "score": int(score),
+        "level": int(level),
+        "length": int(length),
+        "difficulty": str(difficulty),
+        "theme": str(theme),
+        "daily": bool(daily),
+        "seed": seed,
+    }
+    raw = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
+    return "SNAK1-" + base64.urlsafe_b64encode(raw).decode("ascii").rstrip("=")
+
+
+def parse_share_code(code):
+    if not isinstance(code, str) or not code.startswith("SNAK1-"):
+        return None
+    body = code[6:]
+    padding = "=" * (-len(body) % 4)
+    try:
+        payload = json.loads(base64.urlsafe_b64decode(body + padding).decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return None
+    if not isinstance(payload, dict) or payload.get("v") != 1:
+        return None
+    required = ("score", "level", "length", "difficulty", "theme", "daily", "seed")
+    if any(key not in payload for key in required):
+        return None
+    return payload

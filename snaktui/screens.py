@@ -29,7 +29,7 @@ from .models import (
     RunStats,
     daily_label,
 )
-from .storage import ARENA_LABELS, ARENA_SIZES, Store
+from .storage import ARENA_LABELS, ARENA_SIZES, Store, make_share_code
 from .theme import SWATCHES, THEME_ORDER, THEMES, Palette, blend, darken
 
 if TYPE_CHECKING:
@@ -687,6 +687,10 @@ class GameOverScreen(Screen):
         super().__init__()
         self.stats = stats
         self.index = 0
+        self.share_code = make_share_code(
+            stats.score, stats.level, stats.length, stats.difficulty,
+            stats.theme, stats.daily, stats.seed,
+        )
 
     def compose(self) -> ComposeResult:
         with Container(classes="modal-root"):
@@ -694,6 +698,7 @@ class GameOverScreen(Screen):
                 yield Static(id="gameover-title")
                 yield Static(id="gameover-reason")
                 yield Static(id="gameover-stats")
+                yield Static(id="gameover-code")
                 yield Static(id="gameover-actions")
                 yield Static(id="gameover-hint")
 
@@ -732,6 +737,11 @@ class GameOverScreen(Screen):
             body.append("\n")
         self.query_one("#gameover-stats", Static).update(body)
 
+        code = Text()
+        code.append("RUN CODE  ", style=palette.dim)
+        code.append(self.share_code, style=f"bold {palette.accent2}")
+        self.query_one("#gameover-code", Static).update(code)
+
         actions = ["PLAY AGAIN", "HIGH SCORES", "MAIN MENU"]
         listing = Text()
         for position, label in enumerate(actions):
@@ -762,6 +772,8 @@ class GameOverScreen(Screen):
         hint.append("select   ", style=palette.dim)
         hint.append("R  ", style=f"bold {palette.accent2}")
         hint.append("replay   ", style=palette.dim)
+        hint.append("C  ", style=f"bold {palette.accent2}")
+        hint.append("copy code   ", style=palette.dim)
         hint.append("M  ", style=f"bold {palette.accent2}")
         hint.append("menu", style=palette.dim)
         self.query_one("#gameover-hint", Static).update(hint)
@@ -787,6 +799,9 @@ class GameOverScreen(Screen):
             self.activate()
         elif key == "r":
             app_of(self).new_game(daily=self.stats.daily)
+        elif key == "c":
+            self.app.copy_to_clipboard(self.share_code)
+            self.app.notify("Run code copied", timeout=2)
         elif key in ("m", "q", "escape"):
             app_of(self).show_menu()
         elif key == "l":

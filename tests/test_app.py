@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from textual.widgets import Static
 
 from snaktui.app import SnakTUI
 from snaktui.game import Game
@@ -112,6 +113,11 @@ async def test_death_opens_game_over_screen(tmp_path: Path) -> None:
         screen.game._die("boom")
         await pilot.pause(1.5)
         assert isinstance(app.screen, GameOverScreen)
+        code = app.screen.query_one("#gameover-code", Static)
+        assert "SNAK1-" in str(code.render())
+        await pilot.press("c")
+        await pilot.pause(0.1)
+        assert app.clipboard == app.screen.share_code
 
 
 async def test_narrow_terminal_hides_sidebar(tmp_path: Path) -> None:

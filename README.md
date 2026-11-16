@@ -49,6 +49,8 @@ no browser, no GPU.
 - **Daily Challenge** — a date-seeded Classic run (fixed walls + hazards) so
   everyone gets the same arena sequence; results are tagged `DAILY` in the
   leaderboard and show the shareable seed on the results screen.
+- **Run codes** — every game over screen includes a `SNAK1-…` code and `C`
+  copies it to the terminal clipboard for sharing or later parsing.
 - **Persistent settings and top-10 leaderboard** stored as plain JSON.
 - **Palette editor** — Settings → Edit palette; use arrows to recolor, `S` saves
   it as a custom theme, and it persists in `state.json`
@@ -156,6 +158,14 @@ rm -rf "${XDG_DATA_HOME:-$HOME/.local/share}/snaktui"
 | `R` | Restart run |
 | `M` | Toggle sound |
 | `Q` | Back to menu |
+
+### Game over
+
+| Key | Action |
+| --- | --- |
+| `R` | Play again (same Daily seed when applicable) |
+| `C` | Copy the `SNAK1-…` run code |
+| `M` / `Esc` | Main menu |
 
 ### Daily Challenge
 
@@ -282,7 +292,7 @@ Tiny, dependency-free tools from the same family:
 - [plusafetch](https://github.com/Mark44928/plusafetch) — C++23 fetch for Termux — ~23 ms, zero subprocesses on the default path
 - [Plusalator](https://github.com/Mark44928/Plusalator) — C++17 calculator REPL — Qalculate-flavored, ghost autosuggest, 18 themes
 - [GrubBlastersHTML](https://github.com/Mark44928/GrubBlastersHTML) — Turn-based artillery in one HTML file — 72 weapons, fully destructible terrain
-- [Easy-Termux-Package-Manager](https://github.com/Mark44928/Easy-Termux-Package-Manager) — fzf-driven package manager for Termux — snapshots, audit, 186 tests
+- [Easy-Termux-Package-Manager](https://github.com/Mark44928/Easy-Termux-Package-Manager) — fzf-driven package manager for Termux — snapshots, audit, 187 tests
 - [NoNameOS](https://github.com/Mark44928/NoNameOS) — OS simulation in a single C++17 file — virtual FS, real shell
 - [Greenit](https://github.com/Mark44928/Greenit) — green-injected theme family — dark + light, single palette.json
 - [CalculaHTML](https://github.com/Mark44928/CalculaHTML) — static HTML calculator — 15 themes + System mode, zero deps
