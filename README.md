@@ -1,6 +1,6 @@
 # SnakTUI
 
-A feature-rich, visually striking modern **Snake** game for your terminal,
+A **Snake** game for your terminal,
 built with **Python** and **[Textual](https://textual.textualize.io/)**.
 
 Neon gradients, particle bursts, combos, power-ups, hazards, eleven themes and a
@@ -33,7 +33,7 @@ no browser, no GPU.
 
 ## Highlights
 
-- **Fast, modern arena** — gradient snake, glowing food, particle bursts,
+- **Fast arena** — gradient snake, glowing food, particle bursts,
   floating score popups and screen shake on death.
 - **Combo scoring** — eat quickly to stack a multiplier up to **x5**.
 - **Power-ups** — Speed, Slow, Ghost (phase through walls, hazards and
@@ -297,10 +297,13 @@ the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 Tiny, dependency-free tools from the same family:
 
+- [Pythonator](https://github.com/Mark44928/Pythonator) — Python rewrite of Plusalator — stdlib-only, `--eval`/`--json`
+- [Bluney](https://github.com/Mark44928/Bluney) — blue-injected theme family — dark + light, single palette.json
+- [Mark44928](https://github.com/Mark44928) — profile and project index
 - [plusafetch](https://github.com/Mark44928/plusafetch) — C++23 fetch for Termux — ~23 ms, zero subprocesses on the default path
 - [Plusalator](https://github.com/Mark44928/Plusalator) — C++17 calculator REPL — Qalculate-flavored, ghost autosuggest, 18 themes
 - [GrubBlastersHTML](https://github.com/Mark44928/GrubBlastersHTML) — Turn-based artillery in one HTML file — 72 weapons, fully destructible terrain
-- [Easy-Termux-Package-Manager](https://github.com/Mark44928/Easy-Termux-Package-Manager) — fzf-driven package manager for Termux — snapshots, audit, 187 tests
+- [Easy-Termux-Package-Manager](https://github.com/Mark44928/Easy-Termux-Package-Manager) — fzf-driven package manager for Termux — snapshots, audit, 188 tests
 - [NoNameOS](https://github.com/Mark44928/NoNameOS) — OS simulation in a single C++17 file — virtual FS, real shell
 - [Greenit](https://github.com/Mark44928/Greenit) — green-injected theme family — dark + light, single palette.json
 - [CalculaHTML](https://github.com/Mark44928/CalculaHTML) — static HTML calculator — 15 themes + System mode, zero deps

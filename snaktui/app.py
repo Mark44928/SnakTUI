@@ -11,7 +11,7 @@ from textual.theme import Theme
 from .game import Game
 from .models import DIFFICULTIES, GameConfig, RunStats, daily_seed
 from .screens import GameScreen, MenuScreen
-from .storage import Store, entry_from_share_code, make_entry
+from .storage import Store, entry_from_share_code, make_entry, make_share_code
 from .theme import THEMES, Palette, blend, get_palette
 
 
@@ -162,7 +162,6 @@ def main() -> None:
         if not store.scores:
             print("snaktui: no runs saved yet", file=sys.stderr)
             return
-        from .storage import make_share_code
         entry = store.scores[0]
         print(make_share_code(entry.score, entry.level, entry.length, entry.difficulty.lower(), entry.theme, entry.daily))
         return
