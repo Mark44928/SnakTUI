@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import os
 from dataclasses import asdict, dataclass, fields, replace
 from datetime import datetime
@@ -18,6 +19,7 @@ from .theme import THEMES, Palette, palette_from_mapping, register_theme
 
 MAX_SCORES = 10
 MAX_CUSTOM_THEMES = 64
+MAX_GHOST_TRACK = 5000
 ARENA_SIZES = ("auto", "small", "medium", "large")
 ARENA_LABELS = {
     "auto": "Auto",
@@ -89,6 +91,17 @@ class ScoreEntry:
     daily: bool = False
 
 
+@dataclass
+class GhostRun:
+    score: int
+    seed: int | None
+    width: int
+    height: int
+    difficulty: str
+    daily: bool
+    track: list[tuple[float, int, int]]
+
+
 class Store:
     """Loads and saves a small JSON document."""
 
@@ -97,6 +110,7 @@ class Store:
         self.settings = Settings()
         self.scores: list[ScoreEntry] = []
         self.custom_themes: list[dict[str, object]] = []
+        self.ghost: GhostRun | None = None
         self.load()
 
     # -- persistence -------------------------------------------------
@@ -150,11 +164,34 @@ class Store:
                             daily=item.get("daily") is True,
                         )
                     )
-                except (KeyError, TypeError, ValueError):
+                except (KeyError, TypeError, ValueError, OverflowError):
                     continue
             self.scores = sorted(entries, key=lambda entry: entry.score, reverse=True)[
                 :MAX_SCORES
             ]
+
+        raw_ghost = raw.get("ghost")
+        if isinstance(raw_ghost, dict):
+            try:
+                score = int(raw_ghost["score"])
+                seed = raw_ghost.get("seed")
+                seed = int(seed) if seed is not None else None
+                width, height = int(raw_ghost["width"]), int(raw_ghost["height"])
+                difficulty = str(raw_ghost["difficulty"]).lower()
+                daily = raw_ghost.get("daily") is True
+                track = []
+                for frame in raw_ghost.get("track", []):
+                    if not isinstance(frame, (list, tuple)) or len(frame) != 3:
+                        continue
+                    t, x, y = float(frame[0]), int(frame[1]), int(frame[2])
+                    if math.isfinite(t) and t >= 0 and 0 <= x < width and 0 <= y < height:
+                        track.append((t, x, y))
+                    if len(track) >= MAX_GHOST_TRACK:
+                        break
+                if score > 0 and width > 0 and height > 0 and difficulty in DIFFICULTIES and track:
+                    self.ghost = GhostRun(score, seed, width, height, difficulty, daily, track)
+            except (KeyError, TypeError, ValueError, OverflowError):
+                self.ghost = None
 
     def save(self) -> None:
         payload = {
@@ -162,6 +199,7 @@ class Store:
             "settings": asdict(self.settings),
             "scores": [asdict(entry) for entry in self.scores],
             "custom_themes": self.custom_themes,
+            "ghost": asdict(self.ghost) if self.ghost else None,
         }
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -193,6 +231,27 @@ class Store:
         del self.scores[MAX_SCORES:]
         self.save()
         return new_best
+
+    def matching_ghost(self, config) -> GhostRun | None:
+        ghost = self.ghost
+        if ghost is None or ghost.score <= 0:
+            return None
+        if (
+            ghost.width != config.width
+            or ghost.height != config.height
+            or ghost.difficulty != config.difficulty.key
+            or ghost.daily != config.daily
+        ):
+            return None
+        if config.daily and ghost.seed != config.seed:
+            return None
+        return ghost
+
+    def save_ghost(self, ghost: GhostRun) -> None:
+        if ghost.score <= 0 or not ghost.track:
+            return
+        self.ghost = ghost
+        self.save()
 
     def reset_scores(self) -> None:
         self.scores = []

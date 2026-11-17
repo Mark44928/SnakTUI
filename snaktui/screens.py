@@ -343,6 +343,7 @@ class GameScreen(Screen):
         self.config = config
         self.store = store
         self.game = Game(config)
+        self.ghost = store.matching_ghost(config)
         self.palette: Palette | None = None
         self._timer = None
         self._last_tick = 0.0
@@ -358,7 +359,7 @@ class GameScreen(Screen):
         show_sidebar = (self.app.size.width or 80) >= 76
         yield Static(id="hud")
         with Horizontal(id="game-body"):
-            board = SnakeBoard(self.game, palette)
+            board = SnakeBoard(self.game, palette, ghost=self.ghost)
             self._board = board
             yield board
             if show_sidebar:
@@ -487,6 +488,8 @@ class GameScreen(Screen):
         flags.append("WRAP" if self.config.wrap else "WALLS")
         if self.config.obstacles:
             flags.append("HAZ")
+        if self.ghost is not None:
+            flags.append("GHOST")
         if not self.app.settings.sound:
             flags.append("MUTE")
         if game.is_ready:

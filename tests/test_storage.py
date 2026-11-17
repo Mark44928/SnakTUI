@@ -4,8 +4,10 @@ import json
 import re
 from pathlib import Path
 
+from snaktui.models import DIFFICULTIES, GameConfig
 from snaktui.storage import (
     MAX_SCORES,
+    GhostRun,
     ScoreEntry,
     Settings,
     Store,
@@ -244,3 +246,52 @@ def test_share_code_imports_as_score(tmp_path: Path) -> None:
     store = Store(tmp_path / "state.json")
     store.add_score(entry)
     assert store.scores[0].score == 420
+
+
+def test_ghost_round_trips_for_matching_seed(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    store = Store(path)
+    store.save_ghost(
+        GhostRun(120, 20261117, 32, 16, "classic", True, [(0.1, 1, 1), (0.2, 2, 1)])
+    )
+    loaded = Store(path)
+    assert loaded.ghost is not None
+    assert loaded.ghost.track == [(0.1, 1, 1), (0.2, 2, 1)]
+    config = GameConfig(
+        width=32,
+        height=16,
+        difficulty=DIFFICULTIES["classic"],
+        seed=20261117,
+        daily=True,
+    )
+    assert loaded.matching_ghost(config) is not None
+    other_day = GameConfig(
+        width=32,
+        height=16,
+        difficulty=DIFFICULTIES["classic"],
+        seed=20261118,
+        daily=True,
+    )
+    assert loaded.matching_ghost(other_day) is None
+
+
+def test_non_finite_state_numbers_do_not_crash(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    path.write_text(
+        json.dumps(
+            {
+                "scores": [{"score": float("inf")}],
+                "ghost": {
+                    "score": float("inf"),
+                    "width": 10,
+                    "height": 10,
+                    "difficulty": "classic",
+                    "track": [[0, 1, 1]],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    store = Store(path)
+    assert store.scores == []
+    assert store.ghost is None

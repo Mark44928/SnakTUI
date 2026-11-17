@@ -11,7 +11,7 @@ from textual.theme import Theme
 from .game import Game
 from .models import DIFFICULTIES, GameConfig, RunStats, daily_seed
 from .screens import GameScreen, MenuScreen
-from .storage import Store, entry_from_share_code, make_entry, make_share_code
+from .storage import GhostRun, Store, entry_from_share_code, make_entry, make_share_code
 from .theme import THEMES, Palette, blend, get_palette
 
 
@@ -137,6 +137,18 @@ class SnakTUI(App):
         new_best = False
         if game.score > 0:
             new_best = self.store.add_score(entry)
+            if new_best and game.ghost_track:
+                self.store.save_ghost(
+                    GhostRun(
+                        score=game.score,
+                        seed=game.config.seed,
+                        width=game.width,
+                        height=game.height,
+                        difficulty=game.difficulty.key,
+                        daily=game.config.daily,
+                        track=game.ghost_track,
+                    )
+                )
         return game.stats(best=self.store.high_score, new_high_score=new_best)
 
     def action_quit_app(self) -> None:
@@ -173,6 +185,10 @@ def main() -> None:
     if "--help" in argv or "-h" in argv:
         print("usage: snaktui [--version] [--help] [--import-run SNAK1-CODE] [--export-latest]")
         print("Snake for the terminal — run without flags to play.")
+        return
+    if "--snack" in argv:
+        print("  ~>  ~>  ~>  ~>  @")
+        print("  no apples were harmed in the making of this shell")
         return
     unknown = [arg for arg in argv if arg.startswith("-")]
     if unknown:

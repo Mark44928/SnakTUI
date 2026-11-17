@@ -437,6 +437,16 @@ def test_nan_delta_is_ignored() -> None:
     assert game.head == Point(11, 6)
 
 
+def test_ghost_track_records_successful_moves() -> None:
+    game = make_game()
+    game.ready_timer = 0
+    game.update(0.2)
+    assert game.ghost_track
+    stamp, x, y = game.ghost_track[0]
+    assert stamp >= 0
+    assert (x, y) == (game.head.x, game.head.y)
+
+
 def test_seeded_daily_run_is_reproducible() -> None:
     config = GameConfig(
         width=20,

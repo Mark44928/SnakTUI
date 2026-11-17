@@ -31,6 +31,7 @@ SPECIAL_MIN_GAP = 8.0
 SPECIAL_MAX_GAP = 14.0
 LEVEL_MIN_GAP = 4.0
 LEVEL_MAX_GAP = 9.0
+MAX_TRACK = 5000
 
 
 class Game:
@@ -73,6 +74,7 @@ class Game:
         self.flash = 0.0
         self._move_acc = 0.0
         self._special_timer = self.rng.uniform(5.0, 8.0)
+        self.ghost_track: list[tuple[float, int, int]] = []
         self._animation_time = 0.0
 
         if self.config.obstacles and self.difficulty.start_obstacles:
@@ -301,6 +303,10 @@ class Game:
             self._consume(apple, new_head)
         if special is not None:
             self._consume(special, new_head)
+        if len(self.ghost_track) < MAX_TRACK and (
+            not self.ghost_track or self.ghost_track[-1][1:] != (new_head.x, new_head.y)
+        ):
+            self.ghost_track.append((round(self.elapsed, 3), new_head.x, new_head.y))
 
     def _consume(self, food: Food, head: Point) -> None:
         kind = food.kind

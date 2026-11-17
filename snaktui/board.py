@@ -9,6 +9,7 @@ from textual.widget import Widget
 
 from .game import Game
 from .models import FoodKind, Point
+from .storage import GhostRun
 from .theme import Palette, blend, darken
 
 EMPTY = (" ", "", None)
@@ -42,10 +43,11 @@ class SnakeBoard(Widget):
 
     can_focus = False
 
-    def __init__(self, game: Game, palette: Palette, **kwargs: object) -> None:
+    def __init__(self, game: Game, palette: Palette, ghost: GhostRun | None = None, **kwargs: object) -> None:
         super().__init__(**kwargs)
         self.game = game
         self.palette = palette
+        self.ghost = ghost
         self.styles.width = game.width + 2
         self.styles.height = game.height + 2
         self.styles.border = ("round", palette.frame)
@@ -83,6 +85,21 @@ class SnakeBoard(Widget):
                     HAZARD_CHAR,
                     palette.obstacle,
                     darken(palette.obstacle, 0.65),
+                )
+
+        if self.ghost is not None:
+            ghost_head: Point | None = None
+            for index, (stamp, gx, gy) in enumerate(self.ghost.track):
+                if stamp > game.elapsed:
+                    break
+                ghost_head = Point(gx, gy)
+                if index % 3 == 0 and grid[gy][gx][0] == " ":
+                    grid[gy][gx] = ("·", palette.dim, None)
+            if ghost_head is not None and grid[ghost_head.y][ghost_head.x][0] == " ":
+                grid[ghost_head.y][ghost_head.x] = (
+                    "." if a11y else "◌",
+                    f"bold {palette.frame_dim}",
+                    None,
                 )
 
         snake = game.snake
