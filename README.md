@@ -51,6 +51,8 @@ no browser, no GPU.
   leaderboard and show the shareable seed on the results screen.
 - **Run codes** — every game over screen includes a `SNAK1-…` code and `C`
   copies it to the terminal clipboard for sharing or later parsing.
+- **Run-code import** — `snaktui --import-run SNAK1-…` stores a shared run in
+  the local leaderboard; `--export-latest` prints the top saved run's code.
 - **Persistent settings and top-10 leaderboard** stored as plain JSON.
 - **Palette editor** — Settings → Edit palette; use arrows to recolor, `S` saves
   it as a custom theme, and it persists in `state.json`
@@ -102,6 +104,12 @@ python -m snaktui
 
 If `textual` is already installed system-wide, the venv is optional —
 `python -m snaktui` works directly, and `--version` prints the release.
+You can also import a shared run code without launching the TUI:
+
+```bash
+snaktui --import-run 'SNAK1-…'
+snaktui --export-latest   # print the highest saved run as a share code
+```
 
 ### Termux (Android)
 

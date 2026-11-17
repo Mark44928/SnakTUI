@@ -11,7 +11,7 @@ from textual.theme import Theme
 from .game import Game
 from .models import DIFFICULTIES, GameConfig, RunStats, daily_seed
 from .screens import GameScreen, MenuScreen
-from .storage import Store, make_entry
+from .storage import Store, entry_from_share_code, make_entry
 from .theme import THEMES, Palette, blend, get_palette
 
 
@@ -145,13 +145,34 @@ class SnakTUI(App):
 
 def main() -> None:
     argv = sys.argv[1:]
+    if "--import-run" in argv:
+        index = argv.index("--import-run")
+        code = argv[index + 1] if index + 1 < len(argv) else ""
+        try:
+            entry = entry_from_share_code(code)
+        except ValueError as exc:
+            print(f"snaktui: {exc}", file=sys.stderr)
+            return
+        store = Store()
+        store.add_score(entry)
+        print(f"Imported run: {entry.score} on {entry.difficulty.title()} ({entry.theme}) · {entry.date}")
+        return
+    if "--export-latest" in argv:
+        store = Store()
+        if not store.scores:
+            print("snaktui: no runs saved yet", file=sys.stderr)
+            return
+        from .storage import make_share_code
+        entry = store.scores[0]
+        print(make_share_code(entry.score, entry.level, entry.length, entry.difficulty.lower(), entry.theme, entry.daily))
+        return
     if "--version" in argv or "-V" in argv:
         from . import __version__
 
         print(f"snaktui {__version__}")
         return
     if "--help" in argv or "-h" in argv:
-        print("usage: snaktui [--version] [--help]")
+        print("usage: snaktui [--version] [--help] [--import-run SNAK1-CODE] [--export-latest]")
         print("Snake for the terminal — run without flags to play.")
         return
     SnakTUI().run()

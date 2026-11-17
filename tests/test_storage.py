@@ -10,6 +10,7 @@ from snaktui.storage import (
     Settings,
     Store,
     default_data_dir,
+    entry_from_share_code,
     make_entry,
     make_share_code,
     parse_share_code,
@@ -232,3 +233,14 @@ def test_share_code_round_trips() -> None:
     assert payload["daily"] is True
     assert payload["seed"] == 20261116
     assert parse_share_code("not-a-code") is None
+
+
+def test_share_code_imports_as_score(tmp_path: Path) -> None:
+    code = make_share_code(420, 5, 18, "classic", "neon", daily=True, seed=20261116)
+    entry = entry_from_share_code(code)
+    assert entry.score == 420
+    assert entry.difficulty == "classic"
+    assert entry.daily is True
+    store = Store(tmp_path / "state.json")
+    store.add_score(entry)
+    assert store.scores[0].score == 420

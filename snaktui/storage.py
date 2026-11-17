@@ -262,3 +262,36 @@ def parse_share_code(code):
     if any(key not in payload for key in required):
         return None
     return payload
+
+
+def entry_from_share_code(code: str) -> ScoreEntry:
+    payload = parse_share_code(code)
+    if payload is None:
+        raise ValueError("invalid run code")
+    try:
+        score = int(payload["score"])
+        level = int(payload["level"])
+        length = int(payload["length"])
+    except (TypeError, ValueError, OverflowError):
+        raise ValueError("run code contains an invalid score") from None
+    difficulty = str(payload["difficulty"]).strip().lower()
+    theme = str(payload["theme"]).strip().lower()
+    if not 0 < score <= 10_000_000:
+        raise ValueError("run code score is out of range")
+    if not 1 <= level <= 999 or not 1 <= length <= 10_000:
+        raise ValueError("run code result is out of range")
+    if difficulty not in DIFFICULTIES:
+        raise ValueError("run code names an unknown difficulty")
+    if theme not in THEMES:
+        raise ValueError("run code names an unknown theme")
+    if not isinstance(payload["daily"], bool):
+        raise ValueError("run code daily flag is invalid")
+    return ScoreEntry(
+        score=score,
+        level=level,
+        length=length,
+        difficulty=difficulty,
+        theme=theme,
+        date=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        daily=payload["daily"],
+    )

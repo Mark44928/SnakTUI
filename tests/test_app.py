@@ -144,8 +144,9 @@ async def test_theme_change_retints_css_chrome(tmp_path: Path) -> None:
 
 async def test_resize_restores_sidebar(tmp_path: Path) -> None:
     # The sidebar is decided in compose(); growing the terminal mid-run must
-    # mount it back instead of leaving the arena cramped.
-    app = make_app(tmp_path)
+    # mount it back instead of leaving the arena cramped. Keep the snake alive
+    # so a random collision cannot turn this into a GameOver test.
+    app = make_app(tmp_path, wrap=True, obstacles=False)
     async with app.run_test(size=(70, 24)) as pilot:
         await pilot.pause(0.3)
         await pilot.press("enter")
