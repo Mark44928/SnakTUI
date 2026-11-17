@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SnakTUI — terminal Snake</title>
+<style>
+:root{color-scheme:dark;--bg:#08050f;--p:#110b1f;--b:#30264a;--t:#f2edff;--m:#a79ac4;--a:#ff2bd6;--a2:#2de2e6}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(80% 55% at 50% 0,#24113b,var(--bg));color:var(--t);font:16px/1.55 ui-sans-serif,system-ui,sans-serif}
+main{max-width:800px;margin:auto;padding:42px 20px 64px}a{color:var(--a2)}.back{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;color:var(--m)}
+.k{color:var(--a);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;margin:28px 0 8px}h1{font-size:clamp(2.8rem,10vw,5.8rem);line-height:.9;letter-spacing:-.06em;margin:0}
+.lede{font-size:1.16rem;color:var(--m);max-width:60ch}.buttons{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0}.btn{padding:9px 14px;border:1px solid var(--b);border-radius:9px;background:var(--p);color:var(--t);text-decoration:none}.btn.primary{border-color:var(--a);color:var(--a)}
+pre{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:13px;overflow:auto}img{width:100%;border:1px solid var(--b);border-radius:14px;margin:24px 0 8px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;padding:0;list-style:none}.grid li{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:12px;color:var(--m)}.grid b{display:block;color:var(--a2)}footer{margin-top:32px;border-top:1px solid var(--b);padding-top:14px;color:var(--m);font-size:.78rem}
+</style>
+<main>
+<a class="back" href="https://github.com/Mark44928">← Mark44928 / projects</a>
+<p class="k">Game · Python + Textual</p>
+<h1>SnakTUI</h1>
+<p class="lede">Snake for the terminal: daily challenges, share codes, a live palette editor and a ghost trail from your best matching run.</p>
+<div class="buttons"><a class="btn primary" href="https://github.com/Mark44928/SnakTUI">Source &amp; install</a><a class="btn" href="https://github.com/Mark44928/SnakTUI/releases">Releases</a><a class="btn" href="https://github.com/Mark44928">Project hub</a></div>
+<pre>pipx install git+https://github.com/Mark44928/SnakTUI.git
+snaktui</pre>
+<img src="docs/game.png" alt="SnakTUI gameplay">
+<ul class="grid"><li><b>Daily Challenge</b>same seed, separate leaderboard</li><li><b>Ghost racing</b>best-run trail in later matches</li><li><b>Run codes</b>share and import complete runs</li><li><b>94 tests</b>pure simulation + headless UI</li></ul>
+<footer>Built for terminals. No images, browser or GPU required.</footer>
+</main>
+</html>
