@@ -220,6 +220,30 @@ def test_cli_help_flag(capsys: pytest.CaptureFixture[str], monkeypatch: pytest.M
     out = capsys.readouterr().out
     assert "usage" in out
 
+    monkeypatch.setattr(sys, "argv", ["snaktui", "--bogus"])
+    with pytest.raises(SystemExit) as exit_info:
+        main()
+    assert exit_info.value.code == 2
+
+
+def test_cli_imports_share_code_with_saved_custom_theme(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from dataclasses import replace
+
+    from snaktui.app import main
+    from snaktui.storage import Store, make_share_code
+    from snaktui.theme import THEMES
+
+    monkeypatch.setenv("SNAKTUI_DATA_DIR", str(tmp_path))
+    palette = replace(THEMES["neon"], key="custom-share", label="Custom Share")
+    Store().save_custom_theme(palette)
+    code = make_share_code(77, 2, 6, "classic", "custom-share")
+    monkeypatch.setattr(sys, "argv", ["snaktui", "--import-run", code])
+    main()
+    assert "Imported run: 77" in capsys.readouterr().out
+    assert Store().scores[0].score == 77
+
 
 async def test_theme_picker_previews_and_cancel_restores(tmp_path: Path) -> None:
     app = make_app(tmp_path)

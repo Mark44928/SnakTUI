@@ -148,12 +148,12 @@ def main() -> None:
     if "--import-run" in argv:
         index = argv.index("--import-run")
         code = argv[index + 1] if index + 1 < len(argv) else ""
+        store = Store()
         try:
             entry = entry_from_share_code(code)
         except ValueError as exc:
             print(f"snaktui: {exc}", file=sys.stderr)
-            return
-        store = Store()
+            sys.exit(1)
         store.add_score(entry)
         print(f"Imported run: {entry.score} on {entry.difficulty.title()} ({entry.theme}) · {entry.date}")
         return
@@ -161,7 +161,7 @@ def main() -> None:
         store = Store()
         if not store.scores:
             print("snaktui: no runs saved yet", file=sys.stderr)
-            return
+            sys.exit(1)
         entry = store.scores[0]
         print(make_share_code(entry.score, entry.level, entry.length, entry.difficulty.lower(), entry.theme, entry.daily))
         return
@@ -174,4 +174,9 @@ def main() -> None:
         print("usage: snaktui [--version] [--help] [--import-run SNAK1-CODE] [--export-latest]")
         print("Snake for the terminal — run without flags to play.")
         return
+    unknown = [arg for arg in argv if arg.startswith("-")]
+    if unknown:
+        print(f"snaktui: unknown option: {unknown[0]}", file=sys.stderr)
+        print("usage: snaktui [--version] [--help] [--import-run SNAK1-CODE] [--export-latest]", file=sys.stderr)
+        sys.exit(2)
     SnakTUI().run()
