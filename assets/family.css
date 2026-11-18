@@ -1,0 +1,90 @@
+:root {
+  --family-glow: var(--a, var(--green, #61d7ff));
+  --family-glow2: var(--a2, var(--cyan, #ff5bd6));
+}
+
+@keyframes family-float {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to { transform: translate3d(3%, 2%, 0) scale(1.07); }
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  inset: -25%;
+  background:
+    radial-gradient(circle at 20% 30%, var(--family-glow) 0, transparent 36%),
+    radial-gradient(circle at 80% 68%, var(--family-glow2) 0, transparent 38%);
+  filter: blur(58px);
+  opacity: .18;
+  animation: family-float 18s ease-in-out infinite alternate;
+}
+
+body::after {
+  inset: 0;
+  opacity: .12;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, .14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, .14) 1px, transparent 1px);
+  background-size: 52px 52px;
+  -webkit-mask-image: radial-gradient(ellipse at 50% 20%, #000 0, transparent 76%);
+  mask-image: radial-gradient(ellipse at 50% 20%, #000 0, transparent 76%);
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .48s ease, transform .48s ease;
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+pre.has-copy {
+  padding-right: 76px;
+}
+
+.copy-command {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  z-index: 2;
+  padding: 5px 9px;
+  border: 1px solid var(--b, rgba(120, 140, 160, .35));
+  border-radius: 7px;
+  background: rgba(5, 10, 16, .82);
+  color: var(--a, #7bd88f);
+  font: 700 11px/1.2 ui-monospace, monospace;
+  letter-spacing: .07em;
+  cursor: pointer;
+}
+
+.copy-command:hover,
+.copy-command:focus-visible {
+  border-color: var(--a, #7bd88f);
+  color: #fff;
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--family-glow);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+}

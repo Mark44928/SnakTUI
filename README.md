@@ -1,5 +1,7 @@
 # SnakTUI
 
+<p align="center"><img src="assets/logo.svg" width="760" alt="SnakTUI logo"></p>
+
 A **Snake** game for your terminal,
 built with **Python** and **[Textual](https://textual.textualize.io/)**.
 

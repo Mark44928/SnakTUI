@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-labelledby="t d">
+  <title id="t">SnakTUI</title>
+  <desc id="d">SnakTUI logo: a neon green snake on a dark violet panel.</desc>
+  <defs>
+    <linearGradient id="snake" x1="0" x2="1">
+      <stop offset="0" stop-color="#5DFF8B"/>
+      <stop offset="1" stop-color="#2DE2E6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="300" rx="28" fill="#0A0713"/>
+  <rect x="1" y="1" width="1198" height="298" rx="27" fill="none" stroke="#4B2D6B" stroke-width="2"/>
+  <circle cx="150" cy="150" r="96" fill="#120A22" stroke="#2B1942" stroke-width="2"/>
+  <path d="M74 210 C78 164 112 139 150 163 C192 189 225 169 225 128 C225 94 197 77 170 94" fill="none" stroke="url(#snake)" stroke-width="23" stroke-linecap="round"/>
+  <circle cx="168" cy="92" r="19" fill="#A7FF5D"/>
+  <circle cx="174" cy="86" r="4" fill="#0A0713"/>
+  <circle cx="249" cy="213" r="12" fill="#FF2BD6"/>
+  <path d="M249 197 C252 188 260 185 268 188" fill="none" stroke="#5DFF8B" stroke-width="4" stroke-linecap="round"/>
+  <text x="318" y="157" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="92" font-weight="800" letter-spacing="7" fill="#F4F3FF">SNAKTUI</text>
+  <text x="322" y="206" font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="18" letter-spacing="4" fill="#B49CCF">SNAKE · PYTHON + TEXTUAL</text>
+  <text x="1138" y="252" text-anchor="end" font-family="ui-monospace,monospace" font-size="14" letter-spacing="3" fill="#5D4B73">MARK44928</text>
+</svg>

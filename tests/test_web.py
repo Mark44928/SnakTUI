@@ -16,3 +16,9 @@ def test_web_defaults_to_loopback(monkeypatch):
     args = build_parser().parse_args([])
     assert args.host == "127.0.0.1"
     assert args.port == 8000
+
+
+def test_web_empty_port_falls_back(monkeypatch):
+    monkeypatch.setenv("PORT", "")
+    args = build_parser().parse_args([])
+    assert args.port == 8000

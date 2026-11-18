@@ -15,13 +15,24 @@ def build_command() -> str:
     return f"{shlex.quote(sys.executable)} -m snaktui"
 
 
+def default_port() -> int:
+    raw = os.environ.get("PORT", "").strip()
+    if not raw:
+        return 8000
+    try:
+        port = int(raw)
+    except ValueError:
+        return 8000
+    return port if 0 < port < 65536 else 8000
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="snaktui-web",
         description="Serve SnakTUI as the actual Textual app in a browser.",
     )
     parser.add_argument("--host", default=os.environ.get("SNAKTUI_WEB_HOST", "127.0.0.1"))
-    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8000")))
+    parser.add_argument("--port", type=int, default=default_port())
     parser.add_argument("--title", default="SnakTUI")
     return parser
 

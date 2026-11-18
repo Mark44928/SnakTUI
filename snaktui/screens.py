@@ -1241,7 +1241,7 @@ class HighScoresScreen(ModalScreen):
                 table.append(f"  {mode:<8}", style=palette.accent2)
                 table.append(f"  {entry.date}\n", style=palette.dim)
         self.query_one("#scores-table", Static).update(table)
-        badges = badges_for(scores)
+        badges = badges_for(scores, self.store.total_runs)
         chips = Text()
         chips.append("\n  ACHIEVEMENTS\n", style=f"bold {palette.accent2}")
         if not badges:

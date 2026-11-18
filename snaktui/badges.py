@@ -20,15 +20,20 @@ class Badge:
     detail: str
 
 
-def badges_for(entries: Sequence[ScoreEntry]) -> list[Badge]:
+def badges_for(entries: Sequence[ScoreEntry], total_runs: int = 0) -> list[Badge]:
     if not entries:
         return []
 
     best = max(entry.score for entry in entries)
     longest = max(entry.length for entry in entries)
-    runs = len(entries)
-    daily_days = {entry.date for entry in entries if entry.daily and entry.date}
-    insane_wins = sum(1 for entry in entries if entry.difficulty == DIFFICULTIES["insane"].label)
+    runs = max(len(entries), max(0, total_runs))
+    daily_days = {entry.date[:10] for entry in entries if entry.daily and entry.date}
+    insane_key = DIFFICULTIES["insane"].key
+    insane_wins = sum(
+        1
+        for entry in entries
+        if entry.difficulty.strip().lower() == insane_key
+    )
 
     badges = [Badge("first-bite", "FIRST BITE", "completed a run")]
     if best >= 100:

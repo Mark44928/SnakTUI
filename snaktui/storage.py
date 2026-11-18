@@ -109,6 +109,7 @@ class Store:
         self.path = path or default_data_dir() / "state.json"
         self.settings = Settings()
         self.scores: list[ScoreEntry] = []
+        self.total_runs = 0
         self.custom_themes: list[dict[str, object]] = []
         self.ghost: GhostRun | None = None
         self.load()
@@ -193,11 +194,18 @@ class Store:
             except (KeyError, TypeError, ValueError, OverflowError):
                 self.ghost = None
 
+        raw_total = raw.get("total_runs")
+        if isinstance(raw_total, int) and not isinstance(raw_total, bool) and 0 <= raw_total <= 1_000_000_000:
+            self.total_runs = max(raw_total, len(self.scores))
+        else:
+            self.total_runs = len(self.scores)
+
     def save(self) -> None:
         payload = {
             "version": 1,
             "settings": asdict(self.settings),
             "scores": [asdict(entry) for entry in self.scores],
+            "total_runs": self.total_runs,
             "custom_themes": self.custom_themes,
             "ghost": asdict(self.ghost) if self.ghost else None,
         }
@@ -229,6 +237,7 @@ class Store:
         self.scores.append(entry)
         self.scores.sort(key=lambda item: item.score, reverse=True)
         del self.scores[MAX_SCORES:]
+        self.total_runs += 1
         self.save()
         return new_best
 

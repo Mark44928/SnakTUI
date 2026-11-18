@@ -295,3 +295,13 @@ def test_non_finite_state_numbers_do_not_crash(tmp_path: Path) -> None:
     store = Store(path)
     assert store.scores == []
     assert store.ghost is None
+
+
+def test_total_runs_survives_leaderboard_cap(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    store = Store(path)
+    for index in range(12):
+        store.add_score(ScoreEntry(10 + index, 1, 4, "Classic", "neon", "2026-11-18"))
+    loaded = Store(path)
+    assert len(loaded.scores) == MAX_SCORES
+    assert loaded.total_runs == 12
