@@ -19,6 +19,7 @@ no browser, no GPU.
 
 ## Contents
 
+- [Play in the browser](#play-in-the-browser)
 - [Highlights](#highlights)
 - [Installation](#installation)
 - [Controls](#controls)
@@ -55,6 +56,9 @@ no browser, no GPU.
   the local leaderboard; `--export-latest` prints the top saved run's code.
 - **Ghost racing** — your best matching run leaves a dim trail and ghost head in
   the next arena; Daily ghosts only appear on the same seed.
+- **Achievements** — the Hall of Fame derives badges from your saved runs:
+  score milestones, long snakes, run counts, Daily streaks and Insane wins.
+- **Play in the browser** — `web/index.html` is a dependency-free canvas build playable from the repository's Pages site.
 - **Persistent settings and top-10 leaderboard** stored as plain JSON.
 - **Palette editor** — Settings → Edit palette; use arrows to recolor, `S` saves
   it as a custom theme, and it persists in `state.json`
@@ -69,6 +73,17 @@ no browser, no GPU.
 - **Keyboard-first** — full menu, settings, help and high-score screens.
 
 ![SnakTUI gameplay](docs/game.png)
+
+## Play in the browser
+
+Open `web/index.html` through the repository's GitHub Pages site, or serve the `web/` directory statically:
+
+```bash
+cd web && python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+The browser build is a standalone HTML/CSS/JavaScript port; it does not call a backend or collect telemetry. It is intentionally a smaller canvas interpretation of the full terminal game.
 
 ## Installation
 
@@ -305,7 +320,7 @@ Tiny, dependency-free tools from the same family:
 - [plusafetch](https://github.com/Mark44928/plusafetch) — C++23 fetch for Termux — ~23 ms, zero subprocesses on the default path
 - [Plusalator](https://github.com/Mark44928/Plusalator) — C++17 calculator REPL — Qalculate-flavored, ghost autosuggest, 18 themes
 - [GrubBlastersHTML](https://github.com/Mark44928/GrubBlastersHTML) — Turn-based artillery in one HTML file — 72 weapons, fully destructible terrain
-- [Easy-Termux-Package-Manager](https://github.com/Mark44928/Easy-Termux-Package-Manager) — fzf-driven package manager for Termux — snapshots, audit, 193 tests
+- [Easy-Termux-Package-Manager](https://github.com/Mark44928/Easy-Termux-Package-Manager) — fzf-driven package manager for Termux — snapshots, audit, 194 tests
 - [NoNameOS](https://github.com/Mark44928/NoNameOS) — OS simulation in a single C++17 file — virtual FS, real shell
 - [Greenit](https://github.com/Mark44928/Greenit) — green-injected theme family — dark + light, single palette.json
 - [CalculaHTML](https://github.com/Mark44928/CalculaHTML) — static HTML calculator — 15 themes + System mode, zero deps

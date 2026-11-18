@@ -16,6 +16,7 @@ from textual.css.query import NoMatches
 from textual.screen import ModalScreen, Screen
 from textual.widgets import Static
 
+from .badges import badges_for
 from .board import A11Y_FOOD_GLYPHS, FOOD_GLYPHS, SnakeBoard
 from .game import LEVEL_EVERY, Game
 from .models import (
@@ -1207,6 +1208,7 @@ class HighScoresScreen(ModalScreen):
             with Vertical(classes="modal-box scores-box"):
                 yield Static(id="scores-title")
                 yield Static(id="scores-table")
+                yield Static(id="scores-badges")
                 yield Static(id="scores-hint")
 
     def on_mount(self) -> None:
@@ -1239,6 +1241,18 @@ class HighScoresScreen(ModalScreen):
                 table.append(f"  {mode:<8}", style=palette.accent2)
                 table.append(f"  {entry.date}\n", style=palette.dim)
         self.query_one("#scores-table", Static).update(table)
+        badges = badges_for(scores)
+        chips = Text()
+        chips.append("\n  ACHIEVEMENTS\n", style=f"bold {palette.accent2}")
+        if not badges:
+            chips.append("  First bite earns the first badge.\n", style=palette.dim)
+        else:
+            for index, badge in enumerate(badges):
+                if index:
+                    chips.append("  ·  ", style=palette.dim)
+                chips.append(f"[{badge.title}]", style=f"bold {palette.golden}")
+            chips.append("\n")
+        self.query_one("#scores-badges", Static).update(chips)
         hint = Text("ESC / Q  back", style=palette.dim)
         self.query_one("#scores-hint", Static).update(hint)
 
