@@ -18,8 +18,8 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
 | `snaktui/screens.py` | All screens, HUD, sidebar, modals, key handling, and rendering. |
 | `snaktui/app.py` | App shell, adaptive board sizing, screen navigation, score saving. |
 | `snaktui/styles.tcss` | Layout and color CSS. |
-| `tests/` | Pytest suite (98 tests, headless — no TTY needed), including headless Textual smoke tests. |
-| `web/` | Standalone dependency-free canvas build for GitHub Pages; `web/index.html` + `web/assets/`. |
+| `tests/` | Pytest suite (100 tests, headless — no TTY needed), including headless Textual smoke tests. |
+| `snaktui/web.py` | Optional `textual-serve` adapter that runs the real Textual app on an external Python host. |
 
 ## Invariants
 
@@ -55,9 +55,9 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
   dim trail and ghost head. Daily ghosts only match the same date seed.
 - v1.7.0: dynamic achievement badges derive from persisted scores; the
   leaderboard renders only what is earned, without extra persisted state.
-- `web/` must remain dependency-free static HTML/CSS/JS; do not import Python
-  engine at runtime and never add a build step. Do not expose a public game
-  SSH listener from this repository's asset workflow.
+- v1.8.0: optional real browser mode through `textual-serve`; it hosts the
+  actual Textual app and is intentionally not a static clone. Docker/Render
+  files exist only for an external always-on host.
 
 ## Commands (Termux)
 

@@ -4,8 +4,7 @@ A **Snake** game for your terminal,
 built with **Python** and **[Textual](https://textual.textualize.io/)**.
 
 Neon gradients, particle bursts, combos, power-ups, hazards, eleven themes and a
-persistent local leaderboard — all rendered in pure Unicode blocks. No images,
-no browser, no GPU.
+persistent local leaderboard — all rendered in pure Unicode blocks. The terminal edition needs no images, browser or GPU; an optional external host can serve the real app to a browser.
 
 <p align="center">
   <a href="https://github.com/Mark44928/SnakTUI/actions/workflows/ci.yml"><img src="https://github.com/Mark44928/SnakTUI/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
@@ -19,7 +18,7 @@ no browser, no GPU.
 
 ## Contents
 
-- [Play in the browser](#play-in-the-browser)
+- [Browser mode](#browser-mode-real-textual-app)
 - [Highlights](#highlights)
 - [Installation](#installation)
 - [Controls](#controls)
@@ -58,7 +57,7 @@ no browser, no GPU.
   the next arena; Daily ghosts only appear on the same seed.
 - **Achievements** — the Hall of Fame derives badges from your saved runs:
   score milestones, long snakes, run counts, Daily streaks and Insane wins.
-- **Play in the browser** — `web/index.html` is a dependency-free canvas build playable from the repository's Pages site.
+- **Real browser mode** — the same Textual app can be served with `textual-serve` from an external Python host; no browser-specific game clone.
 - **Persistent settings and top-10 leaderboard** stored as plain JSON.
 - **Palette editor** — Settings → Edit palette; use arrows to recolor, `S` saves
   it as a custom theme, and it persists in `state.json`
@@ -74,16 +73,26 @@ no browser, no GPU.
 
 ![SnakTUI gameplay](docs/game.png)
 
-## Play in the browser
+## Browser mode (real Textual app)
 
-Open `web/index.html` through the repository's GitHub Pages site, or serve the `web/` directory statically:
+SnakTUI can run the exact Textual application in a browser through [`textual-serve`](https://github.com/Textualize/textual-serve). It is not a JavaScript clone, and it cannot be hosted on GitHub Pages: a persistent external Python process is required.
+
+Run it on any Python host (not required on your tablet):
 
 ```bash
-cd web && python3 -m http.server 8000
-# open http://localhost:8000
+pip install ".[web]"
+snaktui-web --host 127.0.0.1 --port 8000
+# open http://127.0.0.1:8000
 ```
 
-The browser build is a standalone HTML/CSS/JavaScript port; it does not call a backend or collect telemetry. It is intentionally a smaller canvas interpretation of the full terminal game.
+For an external deployment, the included `Dockerfile` and `render.yaml` run the same app on [Render](https://render.com) or any container host. That host stays available independently of your tablet:
+
+```bash
+docker build -t snaktui-web .
+docker run --rm -p 8000:8000 snaktui-web
+```
+
+Browsing the hosted page starts an isolated SnakTUI process. Scores are container-local unless the host provides persistent storage; treat the hosted build as a demo, not a shared leaderboard. The SSH/Telnet route is deliberately not included.
 
 ## Installation
 
