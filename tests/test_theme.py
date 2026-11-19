@@ -143,6 +143,7 @@ def test_real_terminal_themes_use_official_colors() -> None:
         "mocha": {"bg_a": "#1e1e2e", "frame": "#94e2d5", "snake_tail": "#cba6f7"},
         "tokyo": {"bg_a": "#1a1b26", "frame": "#7aa2f7", "snake_body": "#7dcfff"},
         "solarized": {"bg_a": "#002b36", "frame": "#2aa198", "text": "#839496"},
+        "yellen": {"bg_a": "#171408", "frame": "#F2D14E", "text": "#F3E8B8"},
     }
     for key, expected in official.items():
         palette = THEMES[key]

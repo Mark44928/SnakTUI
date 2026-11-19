@@ -5,7 +5,7 @@
 A **Snake** game for your terminal,
 built with **Python** and **[Textual](https://textual.textualize.io/)**.
 
-Neon gradients, particle bursts, combos, power-ups, hazards, eleven themes and a
+Neon gradients, particle bursts, combos, power-ups, hazards, twelve themes and a
 persistent local leaderboard — all rendered in pure Unicode blocks. The terminal edition needs no images, browser or GPU; an optional external host can serve the real app to a browser.
 
 <p align="center">
