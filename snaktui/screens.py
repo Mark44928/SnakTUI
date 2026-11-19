@@ -428,13 +428,16 @@ class GameScreen(Screen):
             with contextlib.suppress(Exception):
                 self.app.bell()
 
-    def _finish_run(self) -> None:
-        if self._finished:
-            return
+    def _persist_run(self) -> RunStats:
         self._finished = True
         if self._timer is not None:
             self._timer.stop()
-        stats = app_of(self).complete_run(self.game)
+        return app_of(self).complete_run(self.game)
+
+    def _finish_run(self) -> None:
+        if self._finished:
+            return
+        stats = self._persist_run()
         self.app.switch_screen(GameOverScreen(stats))
 
     # -- rendering ---------------------------------------------------
@@ -672,9 +675,13 @@ class GameScreen(Screen):
             self._last_tick = time.monotonic()
 
     def action_quit_to_menu(self) -> None:
+        if self.game.game_over and not self._finished:
+            self._persist_run()
         app_of(self).show_menu()
 
     def action_restart_run(self) -> None:
+        if self.game.game_over and not self._finished:
+            self._persist_run()
         app_of(self).new_game(daily=self.config.daily)
 
     def action_toggle_sound(self) -> None:

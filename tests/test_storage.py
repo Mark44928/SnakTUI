@@ -305,3 +305,20 @@ def test_total_runs_survives_leaderboard_cap(tmp_path: Path) -> None:
     loaded = Store(path)
     assert len(loaded.scores) == MAX_SCORES
     assert loaded.total_runs == 12
+
+
+def test_concurrent_stores_do_not_overwrite_each_other(tmp_path: Path) -> None:
+    path = tmp_path / "state.json"
+    store_a = Store(path)
+    store_b = Store(path)
+    store_a.add_score(ScoreEntry(score=100, level=1, length=4, difficulty="classic", theme="neon", date="2026-11-18 10:00", daily=False))
+    store_b.add_score(ScoreEntry(score=200, level=1, length=4, difficulty="classic", theme="neon", date="2026-11-18 10:01", daily=False))
+    loaded = Store(path)
+    assert {entry.score for entry in loaded.scores} == {100, 200}
+    assert loaded.total_runs == 2
+
+
+def test_share_code_with_unknown_theme_falls_back(tmp_path: Path) -> None:
+    code = make_share_code(50, 1, 4, "classic", "custom-unknown-theme", daily=False, seed=1)
+    entry = entry_from_share_code(code)
+    assert entry.theme == "neon"

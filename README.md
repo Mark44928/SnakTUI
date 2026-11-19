@@ -326,7 +326,9 @@ the [Code of Conduct](CODE_OF_CONDUCT.md).
 Tiny, dependency-free tools from the same family:
 
 - [Pythonator](https://github.com/Mark44928/Pythonator) — Python rewrite of Plusalator — stdlib-only, `--eval`/`--json`
+- [Solvamath](https://github.com/Mark44928/Solvamath) — terminal math puzzle game — seven puzzle types, daily seed, achievements
 - [Bluney](https://github.com/Mark44928/Bluney) — blue-injected theme family — dark + light, single palette.json
+- [Yellen](https://github.com/Mark44928/Yellen) — golden-yellow theme family — dark + light, single palette.json
 - [Mark44928](https://github.com/Mark44928) — profile and project index
 - [plusafetch](https://github.com/Mark44928/plusafetch) — C++23 fetch for Termux — ~23 ms, zero subprocesses on the default path
 - [Plusalator](https://github.com/Mark44928/Plusalator) — C++17 calculator REPL — Qalculate-flavored, ghost autosuggest, 18 themes

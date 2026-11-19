@@ -7,6 +7,8 @@ never in a system path. Set ``SNAKTUI_DATA_DIR`` to override the location.
 from __future__ import annotations
 
 import base64
+import contextlib
+import fcntl
 import json
 import math
 import os
@@ -200,6 +202,27 @@ class Store:
         else:
             self.total_runs = len(self.scores)
 
+    @contextlib.contextmanager
+    def _locked(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = self.path.with_name(self.path.name + ".lock")
+        with open(lock_path, "a", encoding="utf-8") as lock:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+    def _fresh(self) -> Store:
+        return Store(self.path)
+
+    def _absorb(self, other: Store) -> None:
+        self.settings = other.settings
+        self.scores = other.scores
+        self.total_runs = other.total_runs
+        self.custom_themes = other.custom_themes
+        self.ghost = other.ghost
+
     def save(self) -> None:
         payload = {
             "version": 1,
@@ -211,7 +234,7 @@ class Store:
         }
         try:
             self.path.parent.mkdir(parents=True, exist_ok=True)
-            tmp = self.path.with_name(self.path.name + ".tmp")
+            tmp = self.path.with_name(f"{self.path.name}.{os.getpid()}.tmp")
             tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
             tmp.replace(self.path)
         except OSError:
@@ -233,12 +256,15 @@ class Store:
 
         if entry.score <= 0:
             return False
-        new_best = entry.score > self.high_score
-        self.scores.append(entry)
-        self.scores.sort(key=lambda item: item.score, reverse=True)
-        del self.scores[MAX_SCORES:]
-        self.total_runs += 1
-        self.save()
+        with self._locked():
+            fresh = self._fresh()
+            new_best = entry.score > fresh.high_score
+            fresh.scores.append(entry)
+            fresh.scores.sort(key=lambda item: item.score, reverse=True)
+            del fresh.scores[MAX_SCORES:]
+            fresh.total_runs += 1
+            fresh.save()
+            self._absorb(fresh)
         return new_best
 
     def matching_ghost(self, config) -> GhostRun | None:
@@ -259,26 +285,38 @@ class Store:
     def save_ghost(self, ghost: GhostRun) -> None:
         if ghost.score <= 0 or not ghost.track:
             return
-        self.ghost = ghost
-        self.save()
+        with self._locked():
+            fresh = self._fresh()
+            fresh.ghost = ghost
+            fresh.save()
+            self._absorb(fresh)
 
     def reset_scores(self) -> None:
-        self.scores = []
-        self.save()
+        with self._locked():
+            fresh = self._fresh()
+            fresh.scores = []
+            fresh.save()
+            self._absorb(fresh)
 
     # -- settings ----------------------------------------------------
     def update_settings(self, **changes: object) -> Settings:
-        self.settings = replace(self.settings, **changes).sanitized()
-        self.save()
+        with self._locked():
+            fresh = self._fresh()
+            fresh.settings = replace(fresh.settings, **changes).sanitized()
+            fresh.save()
+            self._absorb(fresh)
         return self.settings
 
     def save_custom_theme(self, palette: Palette) -> None:
         register_theme(palette)
         entry = asdict(palette)
-        self.custom_themes = [t for t in self.custom_themes if t.get("key") != palette.key]
-        self.custom_themes.append(entry)
-        del self.custom_themes[:-MAX_CUSTOM_THEMES]
-        self.save()
+        with self._locked():
+            fresh = self._fresh()
+            fresh.custom_themes = [t for t in fresh.custom_themes if t.get("key") != palette.key]
+            fresh.custom_themes.append(entry)
+            del fresh.custom_themes[:-MAX_CUSTOM_THEMES]
+            fresh.save()
+            self._absorb(fresh)
 
 
 def make_entry(
@@ -351,7 +389,7 @@ def entry_from_share_code(code: str) -> ScoreEntry:
     if difficulty not in DIFFICULTIES:
         raise ValueError("run code names an unknown difficulty")
     if theme not in THEMES:
-        raise ValueError("run code names an unknown theme")
+        theme = "neon"  # custom themes don't travel; fall back gracefully
     if not isinstance(payload["daily"], bool):
         raise ValueError("run code daily flag is invalid")
     return ScoreEntry(
