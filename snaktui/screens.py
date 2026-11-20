@@ -569,12 +569,17 @@ class GameScreen(Screen):
         best = max(self.store.high_score, game.score)
         text = Text()
         text.append("◆ RUN STATE\n", style=f"bold {palette.accent}")
+        rate = game.food_eaten / (game.elapsed / 60) if game.elapsed >= 1 else 0.0
+        target = self.store.high_score
+        pb = f"{game.score / target * 100:.0f}%" if target else "—"
         for label, value in (
             ("SCORE", f"{game.score:,}"),
             ("BEST", f"{best:,}"),
             ("LEVEL", f"{game.level}  next {game.apples_to_next_level}/{LEVEL_EVERY}"),
             ("BODY", f"{game.length}"),
             ("TIME", format_time(game.elapsed)),
+            ("PACE", f"{rate:.1f}/min"),
+            ("PB", pb),
         ):
             text.append_text(label_value(label, value, palette))
             if label == "BEST" and game.score > self.store.high_score and game.score > 0:

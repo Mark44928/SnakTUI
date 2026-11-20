@@ -71,7 +71,9 @@ persistent local leaderboard — all rendered in pure Unicode blocks. The termin
 - **Accessibility mode** — letter-coded food (A/G/S/W/H/F/M), high-contrast
   glyphs, and no flashing or food pulse.
 - **Responsive layout** — sidebar appears on wide terminals and hides on
-  narrow ones; the arena adapts to your terminal size.
+  narrow ones; the arena adapts to your terminal size. It also shows live
+  **PACE** (food per minute) and your score as a percentage of the previous
+  best, so you can see the run drifting without opening the leaderboard.
 - **Keyboard-first** — full menu, settings, help and high-score screens.
 
 ![SnakTUI gameplay](docs/game.png)
