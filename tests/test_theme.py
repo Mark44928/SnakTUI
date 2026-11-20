@@ -143,6 +143,8 @@ def test_real_terminal_themes_use_official_colors() -> None:
         "mocha": {"bg_a": "#1e1e2e", "frame": "#94e2d5", "snake_tail": "#cba6f7"},
         "tokyo": {"bg_a": "#1a1b26", "frame": "#7aa2f7", "snake_body": "#7dcfff"},
         "solarized": {"bg_a": "#002b36", "frame": "#2aa198", "text": "#839496"},
+        "greenit": {"bg_a": "#0C1F17", "frame": "#7BD88F", "text": "#DEF4E5"},
+        "bluney": {"bg_a": "#0E1B2E", "frame": "#7DBBFF", "text": "#E3EFF9"},
         "yellen": {"bg_a": "#171408", "frame": "#F2D14E", "text": "#F3E8B8"},
     }
     for key, expected in official.items():

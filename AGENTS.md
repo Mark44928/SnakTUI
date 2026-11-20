@@ -38,6 +38,7 @@ SnakTUI is a terminal Snake game built with Python and Textual. The game core is
   renders at width ≥ 80.
 - v1.2.0: eleven themes in `theme.py` — five hand-tuned + six real terminal
 - v1.9.0: Yellen (gold) family theme in `theme.py`; twelve built-in themes total.
+- v1.10.0: Greenit and Bluney palettes added; fourteen built-in themes total.
   schemes (Dracula, Nord, Gruvbox, Catppuccin Mocha, Tokyo Night, Solarized
   Dark) with official hex values from their upstream palettes. `THEMES` and
   `THEME_ORDER` must stay key-for-key in sync (tests assert it). Version is

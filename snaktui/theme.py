@@ -361,6 +361,54 @@ SOLARIZED = Palette(
     danger="#dc322f",
 )
 
+GREENIT = Palette(
+    key="greenit",
+    label="Greenit",
+    bg_a="#0C1F17",
+    bg_b="#122A1F",
+    frame="#7BD88F",
+    frame_dim="#2F6B4C",
+    snake_head="#DEF4E5",
+    snake_body="#7BD88F",
+    snake_tail="#63C9A8",
+    apple="#C07A6E",
+    golden="#E0CD97",
+    speed="#7FD7C4",
+    slow="#63C9A8",
+    frenzy="#B8CC7A",
+    ghost="#B6F5C6",
+    obstacle="#2F6B4C",
+    accent="#7BD88F",
+    accent2="#63C9A8",
+    text="#DEF4E5",
+    dim="#78997F",
+    danger="#C07A6E",
+)
+
+BLUNEY = Palette(
+    key="bluney",
+    label="Bluney",
+    bg_a="#0E1B2E",
+    bg_b="#122A46",
+    frame="#7DBBFF",
+    frame_dim="#2C4E78",
+    snake_head="#E3EFF9",
+    snake_body="#7DBBFF",
+    snake_tail="#4F8FE0",
+    apple="#E18B8B",
+    golden="#E0CD97",
+    speed="#7FD7F2",
+    slow="#4F8FE0",
+    frenzy="#B9A8E0",
+    ghost="#B9A8E0",
+    obstacle="#2C4E78",
+    accent="#7DBBFF",
+    accent2="#8BD5FF",
+    text="#E3EFF9",
+    dim="#7897B3",
+    danger="#E18B8B",
+)
+
 YELLEN = Palette(
     key="yellen",
     label="Yellen",
@@ -387,7 +435,7 @@ YELLEN = Palette(
 
 THEMES: dict[str, Palette] = {
     palette.key: palette
-    for palette in (NEON, AMBER, MATRIX, ICE, CANDY, DRACULA, NORD, GRUVBOX, MOCHA, TOKYO, SOLARIZED, YELLEN)
+    for palette in (NEON, AMBER, MATRIX, ICE, CANDY, DRACULA, NORD, GRUVBOX, MOCHA, TOKYO, SOLARIZED, GREENIT, BLUNEY, YELLEN)
 }
 BUILTIN_THEME_KEYS = tuple(THEMES)
 THEME_ORDER = list(BUILTIN_THEME_KEYS)

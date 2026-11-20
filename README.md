@@ -5,7 +5,7 @@
 A **Snake** game for your terminal,
 built with **Python** and **[Textual](https://textual.textualize.io/)**.
 
-Neon gradients, particle bursts, combos, power-ups, hazards, twelve themes and a
+Neon gradients, particle bursts, combos, power-ups, hazards, fourteen themes and a
 persistent local leaderboard — all rendered in pure Unicode blocks. The terminal edition needs no images, browser or GPU; an optional external host can serve the real app to a browser.
 
 <p align="center">
@@ -44,9 +44,10 @@ persistent local leaderboard — all rendered in pure Unicode blocks. The termin
   expire.
 - **Progressive difficulty** — level up every 4 apples; speed climbs and
   hazards appear as you survive.
-- **Eleven themes** — five hand-tuned palettes (Neon, Amber, Matrix, Ice,
-  Candy) and six real terminal schemes with their official colors: Dracula,
-  Nord, Gruvbox, Catppuccin Mocha, Tokyo Night and Solarized Dark.
+- **Fourteen themes** — five hand-tuned palettes (Neon, Amber, Matrix, Ice,
+  Candy), six real terminal schemes with their official colors (Dracula, Nord,
+  Gruvbox, Catppuccin Mocha, Tokyo Night and Solarized Dark), plus Greenit,
+  Bluney and Yellen from the family palettes.
 - **Three difficulties** — Chill, Classic and Insane.
 - **Daily Challenge** — a date-seeded Classic run (fixed walls + hazards) so
   everyone gets the same arena sequence; results are tagged `DAILY` in the
@@ -328,6 +329,8 @@ Tiny, dependency-free tools from the same family:
 - [Pythonator](https://github.com/Mark44928/Pythonator) — Python rewrite of Plusalator — stdlib-only, `--eval`/`--json`
 - [Solvamath](https://github.com/Mark44928/Solvamath) — terminal math puzzle game — seven puzzle types, daily seed, achievements
 - [Bluney](https://github.com/Mark44928/Bluney) — blue-injected theme family — dark + light, single palette.json
+- [Fluffless Prompt](https://github.com/Mark44928/FlufflessPrompt) — quiet Oh My Zsh theme — Git state, exit codes, clock
+- [Weatui](https://github.com/Mark44928/Weatui) — friendly Open-Meteo weather TUI — saved cities, forecasts, no API key
 - [Yellen](https://github.com/Mark44928/Yellen) — golden-yellow theme family — dark + light, single palette.json
 - [Mark44928](https://github.com/Mark44928) — profile and project index
 - [plusafetch](https://github.com/Mark44928/plusafetch) — C++23 fetch for Termux — ~23 ms, zero subprocesses on the default path
