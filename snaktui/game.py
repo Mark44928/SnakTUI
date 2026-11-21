@@ -446,8 +446,8 @@ class Game:
             # shortest wrapped path wins; choose the step that closes the most ground
             step_x = raw_dx if raw_dx <= self.width // 2 else self.width - raw_dx
             step_y = raw_dy if raw_dy <= self.height // 2 else self.height - raw_dy
-            dx = 1 if ((target.x - head.x) % self.width) <= self.width // 2 else -1
-            dy = 1 if ((target.y - head.y) % self.height) <= self.height // 2 else -1
+            dx = (1 if ((target.x - head.x) % self.width) <= self.width // 2 else -1) if raw_dx else 0
+            dy = (1 if ((target.y - head.y) % self.height) <= self.height // 2 else -1) if raw_dy else 0
             use_x = step_x >= step_y
         else:
             step_x, step_y = raw_dx, raw_dy

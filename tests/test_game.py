@@ -365,6 +365,21 @@ def test_magnet_expires_and_stops_pulling() -> None:
     assert game.food.pos == resting
 
 
+def test_magnet_uses_shortest_wrapped_path() -> None:
+    # With wrap on, the magnet must drag the apple the short way around the
+    # board edge instead of away from the head.
+    game = make_game(wrap=True)
+    place_snake(game, Point(18, 5), Direction.RIGHT)
+    game.food = Food(FoodKind.APPLE, Point(1, 5))
+    game.effects[FoodKind.MAGNET] = 8.0
+
+    game.update(0.2)
+
+    assert game.food is not None
+    assert game.food.pos.x == 0, "magnet must pull across the wrap edge, not away from it"
+    assert game.food.pos.y == 5
+
+
 def test_pause_freezes_effect_and_combo_timers() -> None:
     game = make_game()
     place_snake(game, Point(5, 5))

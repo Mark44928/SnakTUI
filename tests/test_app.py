@@ -19,7 +19,7 @@ from snaktui.screens import (
     SettingsScreen,
     ThemeScreen,
 )
-from snaktui.storage import Store
+from snaktui.storage import ScoreEntry, Store
 
 
 def make_app(tmp_path: Path, **settings: object) -> SnakTUI:
@@ -83,6 +83,38 @@ async def test_settings_toggle_updates_store(tmp_path: Path) -> None:
         await pilot.press("escape")
         await pilot.pause(0.2)
         assert isinstance(app.screen, MenuScreen)
+
+
+async def test_reset_high_scores_only_on_activate(tmp_path: Path) -> None:
+    app = make_app(tmp_path)
+    async with app.run_test(size=(100, 30)) as pilot:
+        await pilot.pause(0.3)
+        app.store.add_score(
+            ScoreEntry(
+                score=42,
+                level=1,
+                length=5,
+                difficulty="classic",
+                theme="matrix",
+                date="2026-01-01",
+            )
+        )
+        assert app.store.high_score == 42
+
+        await pilot.press("s")
+        await pilot.pause(0.3)
+        assert isinstance(app.screen, SettingsScreen)
+
+        for _ in range(11):
+            await pilot.press("down")
+        await pilot.pause(0.2)
+        await pilot.press("right")
+        await pilot.pause(0.2)
+        assert app.store.high_score == 42, "left/right must not clear high scores"
+
+        await pilot.press("enter")
+        await pilot.pause(0.2)
+        assert app.store.high_score == 0
 
 
 async def test_help_and_scores_modals_open(tmp_path: Path) -> None:

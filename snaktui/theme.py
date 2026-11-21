@@ -69,6 +69,7 @@ class Palette:
     text: str
     dim: str
     danger: str
+    magnet: str = "#5eead4"
 
     def role(self, role: str) -> str:
         """Resolve a semantic color role used by particles and popups.

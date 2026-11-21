@@ -847,6 +847,9 @@ class SettingsScreen(ModalScreen):
     def on_mount(self) -> None:
         self._refresh()
 
+    def on_screen_resume(self) -> None:
+        self._refresh()
+
     def _options(self) -> list[tuple[str, str]]:
         settings = app_of(self).settings
         palette = app_of(self).palette
@@ -944,9 +947,6 @@ class SettingsScreen(ModalScreen):
         elif label == "Arena":
             position = ARENA_SIZES.index(app.settings.arena)
             app.apply_settings(arena=ARENA_SIZES[(position + step) % len(ARENA_SIZES)])
-        elif label == "Reset high scores":
-            app.store.reset_scores()
-            self.message = "High scores cleared."
         self._refresh()
 
     def activate(self) -> None:
@@ -957,6 +957,10 @@ class SettingsScreen(ModalScreen):
             self.app.push_screen(ThemeScreen(self.store))
         elif label == "Edit palette":
             self.app.push_screen(PaletteEditorScreen(self.store))
+        elif label == "Reset high scores":
+            self.store.reset_scores()
+            self.message = "High scores cleared."
+            self._refresh()
         else:
             self._change(1)
 
